@@ -1,0 +1,601 @@
+/home/xiaoyu/Downloads/clion-2017.1.2/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/xiaoyu/Desktop/fullBA
+-- The C compiler identification is GNU 4.8.4
+-- The CXX compiler identification is GNU 4.8.4
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Checking for module 'eigen3'
+--   Found eigen3, version 3.2.0
+-- Found eigen: /usr/include/eigen3  
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Boost version: 1.54.0
+-- Found the following Boost libraries:
+--   system
+--   filesystem
+--   thread
+--   date_time
+--   iostreams
+--   serialization
+--   chrono
+--   atomic
+--   regex
+-- Checking for module 'flann'
+--   Found flann, version 1.8.4
+-- Found Flann: /usr/lib/x86_64-linux-gnu/libflann_cpp_s.a  
+-- Found qhull: /usr/lib/x86_64-linux-gnu/libqhull.so  
+-- Checking for module 'libopenni'
+--   Found libopenni, version 1.5.4.0
+-- Found openni: /usr/lib/libOpenNI.so  
+-- Checking for module 'libopenni2'
+--   Found libopenni2, version 2.2.0.3
+-- Found OpenNI2: /usr/lib/libOpenNI2.so  
+** WARNING ** io features related to pcap will be disabled
+** WARNING ** io features related to png will be disabled
+-- The imported target "vtkWrapTcl" references the file
+   "/usr/bin/vtkWrapTcl"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkWrapTclInit" references the file
+   "/usr/bin/vtkWrapTclInit"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkWrapPython" references the file
+   "/usr/bin/vtkWrapPython"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkWrapPythonInit" references the file
+   "/usr/bin/vtkWrapPythonInit"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkParseJava" references the file
+   "/usr/bin/vtkParseJava"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkWrapJava" references the file
+   "/usr/bin/vtkWrapJava"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkCommonTCL" references the file
+   "/usr/lib/libvtkCommonTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkCommonPythonD" references the file
+   "/usr/lib/libvtkCommonPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkCommonJava" references the file
+   "/usr/lib/jni/libvtkCommonJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkFilteringTCL" references the file
+   "/usr/lib/libvtkFilteringTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkFilteringPythonD" references the file
+   "/usr/lib/libvtkFilteringPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkFilteringJava" references the file
+   "/usr/lib/jni/libvtkFilteringJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkImagingTCL" references the file
+   "/usr/lib/libvtkImagingTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkImagingPythonD" references the file
+   "/usr/lib/libvtkImagingPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkImagingJava" references the file
+   "/usr/lib/jni/libvtkImagingJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGraphicsTCL" references the file
+   "/usr/lib/libvtkGraphicsTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGraphicsPythonD" references the file
+   "/usr/lib/libvtkGraphicsPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGraphicsJava" references the file
+   "/usr/lib/jni/libvtkGraphicsJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGenericFilteringTCL" references the file
+   "/usr/lib/libvtkGenericFilteringTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGenericFilteringPythonD" references the file
+   "/usr/lib/libvtkGenericFilteringPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGenericFilteringJava" references the file
+   "/usr/lib/jni/libvtkGenericFilteringJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkIOTCL" references the file
+   "/usr/lib/libvtkIOTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkIOPythonD" references the file
+   "/usr/lib/libvtkIOPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkIOJava" references the file
+   "/usr/lib/jni/libvtkIOJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkRenderingTCL" references the file
+   "/usr/lib/libvtkRenderingTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkRenderingPythonD" references the file
+   "/usr/lib/libvtkRenderingPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkRenderingJava" references the file
+   "/usr/lib/jni/libvtkRenderingJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkRenderingPythonTkWidgets" references the file
+   "/usr/lib/libvtkRenderingPythonTkWidgets.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkVolumeRenderingTCL" references the file
+   "/usr/lib/libvtkVolumeRenderingTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkVolumeRenderingPythonD" references the file
+   "/usr/lib/libvtkVolumeRenderingPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkVolumeRenderingJava" references the file
+   "/usr/lib/jni/libvtkVolumeRenderingJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkHybridTCL" references the file
+   "/usr/lib/libvtkHybridTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkHybridPythonD" references the file
+   "/usr/lib/libvtkHybridPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkHybridJava" references the file
+   "/usr/lib/jni/libvtkHybridJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkWidgetsTCL" references the file
+   "/usr/lib/libvtkWidgetsTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkWidgetsPythonD" references the file
+   "/usr/lib/libvtkWidgetsPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkWidgetsJava" references the file
+   "/usr/lib/jni/libvtkWidgetsJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkParallelTCL" references the file
+   "/usr/lib/libvtkParallelTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkParallelPythonD" references the file
+   "/usr/lib/libvtkParallelPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkParallelJava" references the file
+   "/usr/lib/jni/libvtkParallelJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkInfovisTCL" references the file
+   "/usr/lib/libvtkInfovisTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkInfovisPythonD" references the file
+   "/usr/lib/libvtkInfovisPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkInfovisJava" references the file
+   "/usr/lib/jni/libvtkInfovisJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGeovisTCL" references the file
+   "/usr/lib/libvtkGeovisTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGeovisPythonD" references the file
+   "/usr/lib/libvtkGeovisPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkGeovisJava" references the file
+   "/usr/lib/jni/libvtkGeovisJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkViewsTCL" references the file
+   "/usr/lib/libvtkViewsTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkViewsPythonD" references the file
+   "/usr/lib/libvtkViewsPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkViewsJava" references the file
+   "/usr/lib/jni/libvtkViewsJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkChartsTCL" references the file
+   "/usr/lib/libvtkChartsTCL.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkChartsPythonD" references the file
+   "/usr/lib/libvtkChartsPythonD.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkChartsJava" references the file
+   "/usr/lib/jni/libvtkChartsJava.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtk" references the file
+   "/usr/bin/vtk"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "pvtk" references the file
+   "/usr/bin/pvtk"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- The imported target "vtkPythonCore" references the file
+   "/usr/lib/libvtkPythonCore.so.5.8.0"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/usr/lib/vtk-5.8/VTKTargets.cmake"
+but not all the files it references.
+
+-- Found libusb-1.0: /usr/include  
+-- looking for PCL_COMMON
+-- Found PCL_COMMON: /usr/lib/libpcl_common.so  
+-- looking for PCL_KDTREE
+-- Found PCL_KDTREE: /usr/lib/libpcl_kdtree.so  
+-- looking for PCL_OCTREE
+-- Found PCL_OCTREE: /usr/lib/libpcl_octree.so  
+-- looking for PCL_SEARCH
+-- Found PCL_SEARCH: /usr/lib/libpcl_search.so  
+-- looking for PCL_SURFACE
+-- Found PCL_SURFACE: /usr/lib/libpcl_surface.so  
+-- looking for PCL_SAMPLE_CONSENSUS
+-- Found PCL_SAMPLE_CONSENSUS: /usr/lib/libpcl_sample_consensus.so  
+-- looking for PCL_IO
+-- Found PCL_IO: /usr/lib/libpcl_io.so  
+-- looking for PCL_FILTERS
+-- Found PCL_FILTERS: /usr/lib/libpcl_filters.so  
+-- looking for PCL_FEATURES
+-- Found PCL_FEATURES: /usr/lib/libpcl_features.so  
+-- looking for PCL_GEOMETRY
+-- Found PCL_GEOMETRY: /usr/include/pcl-1.7  
+-- looking for PCL_KEYPOINTS
+-- Found PCL_KEYPOINTS: /usr/lib/libpcl_keypoints.so  
+-- looking for PCL_REGISTRATION
+-- Found PCL_REGISTRATION: /usr/lib/libpcl_registration.so  
+-- looking for PCL_SEGMENTATION
+-- Found PCL_SEGMENTATION: /usr/lib/libpcl_segmentation.so  
+-- looking for PCL_RECOGNITION
+-- Found PCL_RECOGNITION: /usr/lib/libpcl_recognition.so  
+-- looking for PCL_VISUALIZATION
+-- Found PCL_VISUALIZATION: /usr/lib/libpcl_visualization.so  
+-- looking for PCL_PEOPLE
+-- Found PCL_PEOPLE: /usr/lib/libpcl_people.so  
+-- looking for PCL_OUTOFCORE
+-- Found PCL_OUTOFCORE: /usr/lib/libpcl_outofcore.so  
+-- looking for PCL_TRACKING
+-- Found PCL_TRACKING: /usr/lib/libpcl_tracking.so  
+-- looking for PCL_APPS
+-- Found PCL_APPS: /usr/lib/libpcl_apps.so  
+-- Found PCL: /usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_iostreams.so;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libboost_regex.so;optimized;/usr/lib/libpcl_common.so;debug;/usr/lib/libpcl_common.so;optimized;/usr/lib/x86_64-linux-gnu/libflann_cpp_s.a;debug;/usr/lib/x86_64-linux-gnu/libflann_cpp_s.a;optimized;/usr/lib/libpcl_kdtree.so;debug;/usr/lib/libpcl_kdtree.so;optimized;/usr/lib/libpcl_octree.so;debug;/usr/lib/libpcl_octree.so;optimized;/usr/lib/libpcl_search.so;debug;/usr/lib/libpcl_search.so;optimized;/usr/lib/x86_64-linux-gnu/libqhull.so;debug;/usr/lib/x86_64-linux-gnu/libqhull.so;optimized;/usr/lib/libpcl_surface.so;debug;/usr/lib/libpcl_surface.so;optimized;/usr/lib/libpcl_sample_consensus.so;debug;/usr/lib/libpcl_sample_consensus.so;/usr/lib/libOpenNI.so;/usr/lib/libOpenNI2.so;vtkCommon;vtkFiltering;vtkImaging;vtkGraphics;vtkGenericFiltering;vtkIO;vtkRendering;vtkVolumeRendering;vtkHybrid;vtkWidgets;vtkParallel;vtkInfovis;vtkGeovis;vtkViews;vtkCharts;optimized;/usr/lib/libpcl_io.so;debug;/usr/lib/libpcl_io.so;optimized;/usr/lib/libpcl_filters.so;debug;/usr/lib/libpcl_filters.so;optimized;/usr/lib/libpcl_features.so;debug;/usr/lib/libpcl_features.so;optimized;/usr/lib/libpcl_keypoints.so;debug;/usr/lib/libpcl_keypoints.so;optimized;/usr/lib/libpcl_registration.so;debug;/usr/lib/libpcl_registration.so;optimized;/usr/lib/libpcl_segmentation.so;debug;/usr/lib/libpcl_segmentation.so;optimized;/usr/lib/libpcl_recognition.so;debug;/usr/lib/libpcl_recognition.so;optimized;/usr/lib/libpcl_visualization.so;debug;/usr/lib/libpcl_visualization.so;optimized;/usr/lib/libpcl_people.so;debug;/usr/lib/libpcl_people.so;optimized;/usr/lib/libpcl_outofcore.so;debug;/usr/lib/libpcl_outofcore.so;optimized;/usr/lib/libpcl_tracking.so;debug;/usr/lib/libpcl_tracking.so;optimized;/usr/lib/libpcl_apps.so;debug;/usr/lib/libpcl_apps.so;/usr/lib/x86_64-linux-gnu/libboost_system.so;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;/usr/lib/x86_64-linux-gnu/libboost_thread.so;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;/usr/lib/x86_64-linux-gnu/libboost_iostreams.so;/usr/lib/x86_64-linux-gnu/libboost_serialization.so;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;/usr/lib/x86_64-linux-gnu/libboost_regex.so;optimized;/usr/lib/x86_64-linux-gnu/libqhull.so;debug;/usr/lib/x86_64-linux-gnu/libqhull.so;/usr/lib/libOpenNI.so;/usr/lib/libOpenNI2.so;optimized;/usr/lib/x86_64-linux-gnu/libflann_cpp_s.a;debug;/usr/lib/x86_64-linux-gnu/libflann_cpp_s.a;vtkCommon;vtkFiltering;vtkImaging;vtkGraphics;vtkGenericFiltering;vtkIO;vtkRendering;vtkVolumeRendering;vtkHybrid;vtkWidgets;vtkParallel;vtkInfovis;vtkGeovis;vtkViews;vtkCharts  
+-- Found Eigen3: /usr/include/eigen3 (Required is at least version "2.91.0") 
+-- Found required Ceres dependency: Eigen version 3.2.0 in /usr/include/eigen3
+-- Found required Ceres dependency: glog
+-- Performing Test GFLAGS_IN_GOOGLE_NAMESPACE
+-- Performing Test GFLAGS_IN_GOOGLE_NAMESPACE - Success
+-- Found required Ceres dependency: gflags
+-- Found Ceres version: 1.12.0 installed in: /usr/local with components: [LAPACK, SuiteSparse, SparseLinearAlgebraLibrary, SchurSpecializations, OpenMP]
+ceres found 1 at /usr/local/lib/cmake/Ceres
+/usr/local/include
+gflags found TRUE at /usr/local/include with namespace: google
+-- Configuring done
+WARNING: Target "ba" requests linking to directory "/usr/lib".  Targets may link only to libraries.  CMake is dropping the item.
+WARNING: Target "ba" requests linking to directory "/usr/lib".  Targets may link only to libraries.  CMake is dropping the item.
+WARNING: Target "fullBA" requests linking to directory "/usr/lib".  Targets may link only to libraries.  CMake is dropping the item.
+-- Generating done
+-- Build files have been written to: /home/xiaoyu/Desktop/fullBA/cmake-build-debug

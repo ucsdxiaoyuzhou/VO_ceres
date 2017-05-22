@@ -1,0 +1,6 @@
+/home/xiaoyu/Desktop/fullBA/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/xiaoyu/Desktop/fullBA/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/xiaoyu/Desktop/fullBA/cmake-build-debug/src/CMakeFiles/edit_cache.dir
+/home/xiaoyu/Desktop/fullBA/cmake-build-debug/src/CMakeFiles/rebuild_cache.dir
+/home/xiaoyu/Desktop/fullBA/cmake-build-debug/src/CMakeFiles/ba.dir
+/home/xiaoyu/Desktop/fullBA/cmake-build-debug/src/CMakeFiles/fullBA.dir
