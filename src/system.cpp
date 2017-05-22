@@ -93,7 +93,7 @@ void SLAMsystem(string commonPath, string yamlPath){
             allFrame[MAX(0, n-t)]->matchFrame(currFrame);
             allFrame[MAX(0, n-t)]->manageMapPoints(currFrame);
         }
-//        ba.localBundleAdjustment(allFrame, MAX(0, n-localTimes), localTimes);
+        ba.localBundleAdjustment(allFrame, MAX(0, n-localTimes), localTimes);
 
         //=================== show result ================================
         Mat showTvec, showRvec;

@@ -20,7 +20,7 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     fy = _srp.P1.at<double>(1,1);
     cx = _srp.P1.at<double>(0,2);
     cy = _srp.P1.at<double>(1,2);
-    b = _srp.P2.at<double>(0,3)/fx;
+    b = -_srp.P2.at<double>(0,3)/fx;
 
     // Mat imgLgray, imgRgray;
     // cvtColor(imgL, imgLgray, CV_BGR2GRAY);
@@ -99,10 +99,6 @@ void Frame::matchFrame(Frame* frame){
 
     sort(matchesBetweenFrame.begin(), matchesBetweenFrame.end(), idx_comparator);
 
-    // for(int n = 0; n < matchesBetweenFrame.size(); n++){
-    //  cout << matchesBetweenFrame[n].queryIdx << "  "<< matchesBetweenFrame[n].trainIdx<<endl;
-    // }
-
     vector<Point2f> finalP1, finalP2;
     for(int n = 0; n < matchesBetweenFrame.size(); n++){
         finalP1.push_back(keypointL[matchesBetweenFrame[n].queryIdx].pt);
@@ -126,12 +122,12 @@ void Frame::transformScenePtsToWorldCoordinate(){
 void Frame::manageMapPoints(Frame* frame){    
     int newMappointCount = 0;
     int newObservationCount = 0;
-    // cout << "final match size: " << finalMatches.size() << endl;
+
     for(int n = 0; n < matchesBetweenFrame.size(); n++){
 
     	unsigned int qIdx = (unsigned int)matchesBetweenFrame[n].queryIdx;
     	unsigned int tIdx = (unsigned int)matchesBetweenFrame[n].trainIdx;
-    	// cout << qIdx << "   " << tIdx << endl;
+
     	if(mappoints[qIdx] == NULL){
     		//create new mappoint in current frame
     		//create a pointer to this mappoint in the matched frame
@@ -160,8 +156,8 @@ void Frame::manageMapPoints(Frame* frame){
 
 
 MapPoint* Frame::createNewMapPoint(unsigned int pointIdx){
-	MapPoint* ptrMp = new MapPoint(scenePtsinWorld[pointIdx], frameID, pointIdx);
-	return ptrMp;
+//	MapPoint* ptrMp = new MapPoint(scenePtsinWorld[pointIdx], frameID, pointIdx);
+	return new MapPoint(scenePtsinWorld[pointIdx], frameID, pointIdx);
 }
 
 void Frame::pointToExistingMapPoint(Frame* frame, MapPoint* mp, unsigned int currIdx){
@@ -195,8 +191,6 @@ void Frame::releaseMemory(){
     despR.release();
 
 }
-
-
 
 void Frame::matchFeatureKNN(const Mat& desp1, const Mat& desp2, 
                             const vector<KeyPoint>& keypoint1, 
