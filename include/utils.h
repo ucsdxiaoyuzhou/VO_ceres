@@ -76,6 +76,10 @@ void getAccumulateMotion(const std::vector<cv::Mat>& Rvec,
                          int startIdx, int endIdx,
                          cv::Mat& accumRvec, cv::Mat& accumTvec);
 
+void getRelativeMotion(const cv::Mat startPosR, const cv::Mat startPosT,
+						   const cv::Mat endPosR, const cv::Mat endPosT,
+					   cv::Mat& r2to1, cv::Mat& t2to1);
+
 Eigen::Affine3d vectorToTransformation(cv::Mat rvec, cv::Mat tvec);
 
 std::vector<cv::Point3f> transformPoints(Eigen::Affine3d trans, std::vector<cv::Point3f> obj_pts);

@@ -6,6 +6,23 @@ using namespace std;
 Mapviewer::Mapviewer(){
 	// viewer = new pcl::visualization::CloudViewer(n);
 	// cloud = new pcl::PointCloud<pcl::PointXYZ>();
+//	PointCloud<PointXYZRGB> curCamera;
+	float cameraSize = 0.1;
+	for(float x = -cameraSize; x < cameraSize; x+=(cameraSize/5)){
+		for(float y = -cameraSize; y < cameraSize; y+=(cameraSize/5)){
+			for(float z = -cameraSize; z < cameraSize; z+=(cameraSize/5)){
+				PointXYZRGB pt;
+				pt.x = x;
+				pt.y = y;
+				pt.z = z;
+				pt.r = 255;
+				pt.g = 0;
+				pt.b = 0;
+				templateCamera.push_back(pt);
+			}
+		}
+	}
+
 }
 
 
@@ -40,6 +57,9 @@ void Mapviewer::jointToMap(PointCloud<PointXYZRGB> frameMap, Eigen::Affine3d& tr
 		cout << "map initialized!" << endl;
 	}
 	entireMap = frameMap;
+	for(auto cam : allCameras){
+		entireMap += cam;
+	}
 
 
 }
@@ -61,4 +81,12 @@ void Mapviewer::addMorePoints(PointCloud<PointXYZRGB> frameMap, Eigen::Affine3d&
         frameMap = *cloud;
 	}
 	entireMap += frameMap;
+}
+
+void Mapviewer::addCamera(Eigen::Affine3d& trans){
+	//generata a set of points
+	Eigen::Affine3d invTrans = trans.inverse();
+	PointCloud<PointXYZRGB> curCamera;
+	transformPointCloud(templateCamera, curCamera, invTrans);
+	allCameras.push_back(curCamera);
 }

@@ -20,6 +20,10 @@
 class Mapviewer{
 
 public:
+	std::vector<pcl::PointCloud<pcl::PointXYZRGB> > allCameras;
+	pcl::PointCloud<pcl::PointXYZRGB> templateCamera;
+
+
 	pcl::PointCloud<pcl::PointXYZRGB> entireMap;// (new PointCloud<PointXYZ>);
 	bool initialized = false;
 
@@ -29,6 +33,7 @@ public:
 													 int R=255, int G=255, int B=255);
 	
 	void addMorePoints(pcl::PointCloud<pcl::PointXYZRGB> frameMap, Eigen::Affine3d& trans, bool downsample = false);
+	void addCamera(Eigen::Affine3d& trans);
 };
 
 

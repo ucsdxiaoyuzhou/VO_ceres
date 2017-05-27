@@ -21,7 +21,7 @@ RIGHT.P: !!opencv-matrix
 
 start index: 0
 data length: 0
-local optimization times: 4
+local optimization times: 3
 
 
 trajectory file: "../pose01.txt" 

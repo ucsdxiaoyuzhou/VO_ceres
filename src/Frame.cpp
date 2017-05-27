@@ -30,7 +30,7 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     // (*detector)(imgLgray, cv::Mat(), keypointL, despL);
     // (*detector)(imgRgray, cv::Mat(), keypointR, despR);
 
-    SurfFeatureDetector detector(2);
+    SurfFeatureDetector detector(10, 6, 3);
     SurfDescriptorExtractor descriptor;
     
     detector.detect(imgL, keypointL);
@@ -51,7 +51,7 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     //compute stereo matches
     matchFeatureKNN(despL, despR, keypointL, keypointR,
     				stereoKeypointLeft, stereoKeypointRight,
-    				stereoMatches, 0.8);
+    				stereoMatches, 0.7);
 
     compute3Dpoints(stereoKeypointLeft, stereoKeypointRight,
     				keypointL, keypointR);
@@ -76,7 +76,7 @@ void Frame::matchFrame(Frame* frame){
     matchFeatureKNN(despL, frame->despL, 
                     keypointL, frame->keypointL,
                     matchedPrev, matchedCurr,
-                    matches, 0.7);
+                    matches, 0.8);
 
     // obtain obj_pts, img_pts and matchedIdx
     vector<Point3f> obj_pts;
@@ -128,11 +128,11 @@ void Frame::manageMapPoints(Frame* frame){
     	unsigned int qIdx = (unsigned int)matchesBetweenFrame[n].queryIdx;
     	unsigned int tIdx = (unsigned int)matchesBetweenFrame[n].trainIdx;
 
-    	if(mappoints[qIdx] == NULL){
+    	if(mappoints[qIdx] == NULL && frame->mappoints[tIdx] == NULL){
     		//create new mappoint in current frame
     		//create a pointer to this mappoint in the matched frame
     		//also need to add an observation
-            originality[qIdx] = true; 
+//            originality[qIdx] = true;
     		mappoints[qIdx] = createNewMapPoint(qIdx);
             pointToExistingMapPoint(frame, mappoints[qIdx], tIdx);
 
@@ -140,13 +140,22 @@ void Frame::manageMapPoints(Frame* frame){
     		mappoints[qIdx]->addObservation(this, qIdx);
 
     		map->addMapPoint(mappoints[qIdx]);
-    		newMappointCount++;
+//    		newMappointCount++;
     	}
-    	else{
-    		//add observation to existing mappoint
-    		mappoints[qIdx]->addObservation(frame, tIdx);
+        else if(mappoints[qIdx] == NULL && frame->mappoints[tIdx] != NULL){
+            pointToExistingMapPoint(this, frame->mappoints[tIdx], qIdx);
+            frame->mappoints[tIdx]->addObservation(this, qIdx);
+        }
+        else if(mappoints[qIdx] != NULL && frame->mappoints[tIdx] == NULL){
             pointToExistingMapPoint(frame, mappoints[qIdx], tIdx);
-    		newObservationCount++;
+            mappoints[qIdx]->addObservation(frame,tIdx);
+        }
+
+    	else if(mappoints[qIdx] != NULL && frame->mappoints[tIdx] != NULL){
+    		//add observation to existing mappoint
+//    		mappoints[qIdx]->addObservation(frame, tIdx);
+//            pointToExistingMapPoint(frame, mappoints[qIdx], tIdx);
+//    		newObservationCount++;
     	}
     }
 //     cout << "new mappoints number: " << newMappointCount <<endl;
@@ -154,6 +163,88 @@ void Frame::manageMapPoints(Frame* frame){
     // cout << "between frame: "<<frameID <<" and frame: " << frame->frameID << endl<<endl;
 }
 
+void Frame::judgeBadPoints(){
+/*    //compute mean for x, y, z
+    float meanX = 0, meanY = 0, meanZ = 0;
+    int pointNum = 0;
+    for(auto mappoint : mappoints){
+        if(mappoint != NULL){
+            meanX += mappoint->pos.x;
+            meanY += mappoint->pos.y;
+            meanZ += mappoint->pos.z;
+            pointNum++;
+        }
+    }
+    meanX /= (float)pointNum;
+    meanY /= (float)pointNum;
+    meanZ /= (float)pointNum;
+    cout << "mean X: " << meanX << endl;
+    cout << "mean Y: " << meanY << endl;
+    cout << "mean Z: " << meanZ << endl;
+
+
+    //compute variance for x, y, z
+    float varX = 0, varY = 0, varZ = 0;
+    for(auto mappoint : mappoints){
+        if(mappoint != NULL){
+            varX += pow((mappoint->pos.x - meanX), 2);
+            varY += pow((mappoint->pos.y - meanY), 2);
+            varZ += pow((mappoint->pos.z - meanZ), 2);
+        }
+    }
+    varX /= pointNum;
+    varY /= pointNum;
+    varZ /= pointNum;
+    cout << "variance X: " << varX << endl;
+    cout << "variance Y: " << varY << endl;
+    cout << "variance Z: " << varZ << endl;
+
+
+    //detect bad points
+    for(auto mappoint : mappoints){
+        if(mappoint != NULL){
+            float curVarX = pow((mappoint->pos.x - meanX), 2);
+            float curVarY = pow((mappoint->pos.y - meanY), 2);
+            float curVarZ = pow((mappoint->pos.z - meanX), 2);
+            if(curVarX > 1.5* varX || curVarY > 1.5*varY || curVarZ > 1.5*varZ){
+                mappoint->isBad = true;
+            }
+
+        }
+    }
+*/
+    //count total number
+    int validPointNumber = 0;
+    for(auto mappoint : mappoints){
+        if(mappoint != NULL){validPointNumber++;}
+    }
+    //compute each point to other points average distance, if too large, discard
+    for(auto mappoint : mappoints){
+        if(mappoint != NULL) {
+            int closeCount = 0, farCount = 0;
+            for (auto compareMappoint : mappoints) {
+                if (compareMappoint != NULL) {
+                    float distX = compareMappoint->pos.x - mappoint->pos.x;
+                    float distY = compareMappoint->pos.y - mappoint->pos.y;
+                    float distZ = compareMappoint->pos.z - mappoint->pos.z;
+                    if(sqrt(pow(distX, 2) + pow(distY, 2) + pow(distZ, 2)) < 100 * b){
+                        closeCount++;
+                    }
+                    else{
+                        farCount++;
+                    }
+//                    cout << "distX: " << distX <<"  distY: " << distY << "  distZ: " << distZ << endl;
+//                    cout << "short distance: " << sqrt(pow(distX, 2) + pow(distY, 2) + pow(distZ, 2)) << endl;
+//                    distance += sqrt(pow(distX, 2) + pow(distY, 2) + pow(distZ, 2));
+                }
+            }
+            if ((float)farCount/(float)closeCount > 0.1) { mappoint->isBad = true; }
+        }
+    }
+//    cout << "thres: " << 100*b << endl;
+
+
+}
 
 MapPoint* Frame::createNewMapPoint(unsigned int pointIdx){
 //	MapPoint* ptrMp = new MapPoint(scenePtsinWorld[pointIdx], frameID, pointIdx);
@@ -249,7 +340,7 @@ void Frame::compute3Dpoints(vector<KeyPoint>& kl,
 	trikl.clear();
 	trikr.clear();
 
-	double thres = 60*b;
+	double thres = 45*b;
 
 	for(int n = 0; n < copy_kl.size(); n++){
 		Point3f pd;
@@ -258,11 +349,26 @@ void Frame::compute3Dpoints(vector<KeyPoint>& kl,
 		pd.y = (float)(b*(copy_kl[n].pt.y - cy)/d);
 		pd.z = (float)(b*fx/d);
 		if(pd.z < thres &&
-		   fabs(copy_kl[n].pt.y - copy_kr[n].pt.y) < 10){
+		   fabs(copy_kl[n].pt.y - copy_kr[n].pt.y) < 4){
 			scenePts.push_back(pd);
 			trikl.push_back(copy_kl[n]);
 			trikr.push_back(copy_kr[n]);
 		}
 	}
+}
 
+Eigen::Affine3d Frame::getWorldTransformationMatridx(){
+    Mat R;
+    Eigen::Affine3d result;
+    Rodrigues(worldRvec, R);
+    for(int r = 0; r < 3; r++){
+        for(int c = 0; c < 3; c++){
+            result(r,c) = R.at<double>(r,c);
+        }
+    }
+    result(0,3) = worldTvec.at<double>(0,0);
+    result(1,3) = worldTvec.at<double>(1,0);
+    result(2,3) = worldTvec.at<double>(2,0);
+
+    return result;
 }

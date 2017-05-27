@@ -21,7 +21,7 @@ void SLAMsystem(string commonPath, string yamlPath){
         cerr << "ERROR: Wrong path to settings" << endl;
         return;
     }
-
+    string savePath = fsSettings["trajectory file"];
     fsSettings["LEFT.P"] >> srp.P1;
     fsSettings["RIGHT.P"] >> srp.P2;
 
@@ -61,7 +61,7 @@ void SLAMsystem(string commonPath, string yamlPath){
     int deleteFrame = -20;
 
     Problem globalBAProblem;
-    Optimizer ba(false, globalBAProblem);
+    Optimizer ba(true, globalBAProblem);
 
     pcl::visualization::CloudViewer viewer("Cloud Viewer");
     PointCloud<PointXYZRGB>::Ptr cloud (new PointCloud<PointXYZRGB>);
@@ -71,9 +71,14 @@ void SLAMsystem(string commonPath, string yamlPath){
 
     Frame* prevFrame = new Frame(leftImgName[0], rightImgName[0], srp, 0, &map);
     prevFrame->scenePtsinWorld = prevFrame->scenePts;
+
+    Frame* refFrame = new Frame(leftImgName[0], rightImgName[0], srp, 0, &map);
+    refFrame = prevFrame;
+
     allFrame.push_back(prevFrame);
 
     for(int n = 1; n < dataLength; n++){
+        cout << "current frame number: " << n << endl;
         Frame* currFrame = new Frame(leftImgName[n], rightImgName[n], srp, n, &map);
         prevFrame->matchFrame(currFrame);
         //=================== accumlate motion ====================
@@ -85,48 +90,79 @@ void SLAMsystem(string commonPath, string yamlPath){
 
         currFrame->setWrdTransVectorAndTransScenePts(accumRvec, accumTvec);
         prevFrame->manageMapPoints(currFrame);
-
         allFrame.push_back(currFrame);
         //=================== perform more matching ====================
-        for(int t = localTimes; t > 0; t--){
-//            cout <<"matching from: " << MAX(0, n-t) << " to: " << n << endl;
-            allFrame[MAX(0, n-t)]->matchFrame(currFrame);
-            allFrame[MAX(0, n-t)]->manageMapPoints(currFrame);
+        for(int t = localTimes-1; t > 0; t--){
+//            cout <<"matching from: " << MAX(0, (int)allFrame.size() - localTimes-1) << " to: " << MAX(0, n-t)  << endl;
+//            allFrame[MAX(0, n-t)]->matchFrame(currFrame);
+//            allFrame[MAX(0, n-t)]->manageMapPoints(currFrame);
+            refFrame->matchFrame(allFrame[MAX(0, n-t)]);
+            refFrame->manageMapPoints(allFrame[MAX(0, n-t)]);
         }
-        ba.localBundleAdjustment(allFrame, MAX(0, n-localTimes), localTimes);
+        ba.localBundleAdjustment(allFrame, MAX(0, (int)allFrame.size()-localTimes), localTimes);
+        allFrame[MAX(0, (int)allFrame.size()-localTimes)]->judgeBadPoints();
 
+        //================= test: count bad point number =================
+//        int badPointNum = 0;
+//        for(auto mappoint : map.allMapPoints){
+//            if(mappoint->isBad){badPointNum++;}
+//        }
+//        cout << "bad point number: " << badPointNum << endl;
         //=================== show result ================================
-        Mat showTvec, showRvec;
-        getAccumulateMotion(relativeRvec_cam, relativeTvec_cam,
-                            0, MAX(0, n - localTimes), accumRvec, accumTvec);
-        cout <<endl<<endl<< n<<"  "<<accumTvec.at<double>(0,0)<<"  "<<accumTvec.at<double>(1,0)<<"  "<<accumTvec.at<double>(2,0)<<endl;
+//        Mat showTvec, showRvec;
+//        getAccumulateMotion(relativeRvec_cam, relativeTvec_cam,
+//                            0, MAX(0, n - localTimes),
+//                            accumRvec, accumTvec);
+//        cout <<endl<<endl<< n<<"  "<<accumTvec.at<double>(0,0)<<"  "<<accumTvec.at<double>(1,0)<<"  "<<accumTvec.at<double>(2,0)<<endl;
+//
+//        showRvec = allFrame[MAX(0, n - localTimes)]->worldRvec.clone();
+//        showTvec = allFrame[MAX(0, n - localTimes)]->worldTvec.clone();
+//        cout <<"  "<<showTvec.at<double>(0,0)<<"  "<<showTvec.at<double>(1,0)<<"  "<<showTvec.at<double>(2,0)<<endl<<endl;
+        //============== update accumulative transformation ================
+        for(int n = MAX(0, (int)allFrame.size()-localTimes)+1; n < allFrame.size(); n++){
 
-        showRvec = allFrame[MAX(0, n - localTimes)]->worldRvec.clone();
-        showTvec = allFrame[MAX(0, n - localTimes)]->worldTvec.clone();
-        cout <<"  "<<showTvec.at<double>(0,0)<<"  "<<showTvec.at<double>(1,0)<<"  "<<showTvec.at<double>(2,0)<<endl<<endl;
+            getRelativeMotion(allFrame[n-1]->worldRvec, allFrame[n-1]->worldTvec,
+                              allFrame[n]->worldRvec,   allFrame[n]->worldTvec,
+                              relativeRvec_cam[n-1],
+                              relativeTvec_cam[n-1]);
+        }
+        Mat tempAccumRvec, tempAccumTvec;
+        for(int n = MAX(0, (int)allFrame.size()-localTimes); n < allFrame.size(); n++) {
+
+            getAccumulateMotion(relativeRvec_cam, relativeTvec_cam,
+                                0, n, tempAccumRvec, tempAccumTvec);
+            allFrame[n]->setWrdTransVectorAndTransScenePts(tempAccumRvec,tempAccumTvec);
+        }
 
         //=============draw map=============================================
         Eigen::Affine3d curTrans =  Eigen::Affine3d::Identity();
+        Eigen::Affine3d curCam = vectorToTransformation(tempAccumRvec, tempAccumTvec);
         vector<Point3f> allPoints = map.getAllMapPoints();
 
+        mapviewer.addCamera(curCam);
         mapviewer.jointToMap(mapviewer.pointToPointCloud(allPoints), curTrans);
+
         *cloud = mapviewer.entireMap;
 
         viewer.showCloud(cloud);
         if(waitKey(5) == 27){};
 
-        prevFrame = currFrame;
+        refFrame = allFrame[MAX(0, (int)allFrame.size()-localTimes-1 )];
+
+        prevFrame = allFrame.back();
 
         deleteFrame++;
-        if(deleteFrame > 0){
+        if(deleteFrame > 0) {
             allFrame[deleteFrame]->releaseMemory();
         }
     }
 
 //============== end of main loop =========================================================================
-    ba.globalBundleAdjustment(&map, allFrame);
 
-    //evaluate
+
+    ofstream outfile;
+    outfile.open("../beforeBA.txt");
+    //evaluate before global BA
     for(int n = 0; n < dataLength; n++){
         // Mat accumRvec, accumTvec;
         getAccumulateMotion(relativeRvec_cam, relativeTvec_cam,
@@ -150,8 +186,58 @@ void SLAMsystem(string commonPath, string yamlPath){
 
         double diffz = allFrame[n]->worldTvec.at<double>(2,0) - accumTvec.at<double>(2,0);
         cout << setprecision(15)<< diffz/accumTvec.at<double>(2,0) * 100.0 <<"\%" <<endl;
+
+        Eigen::Affine3d curPose = vectorToTransformation(accumRvec, accumTvec);
+        Eigen::Affine3d invPose = curPose.inverse();
+
+        for(int r = 0; r < 3; r++){
+            for(int c = 0; c < 4; c++){
+                outfile << invPose(r,c) << " ";
+            }
+        }
+        outfile << endl;
     }
-    // draw points after BA
+    outfile.close();
+
+    outfile.open(savePath);
+    ba.globalBundleAdjustment(&map, allFrame);
+    //============== update accumulative transformation ================
+    for(int n = 1; n < allFrame.size(); n++){
+
+        getRelativeMotion(allFrame[n-1]->worldRvec, allFrame[n-1]->worldTvec,
+                          allFrame[n]->worldRvec,   allFrame[n]->worldTvec,
+                          relativeRvec_cam[n-1],
+                          relativeTvec_cam[n-1]);
+    }
+    Mat tempAccumRvec, tempAccumTvec;
+    for(int n = 0; n < allFrame.size(); n++) {
+
+        getAccumulateMotion(relativeRvec_cam, relativeTvec_cam,
+                            0, n, tempAccumRvec, tempAccumTvec);
+        allFrame[n]->setWrdTransVectorAndTransScenePts(tempAccumRvec,tempAccumTvec);
+    }
+    //evaluate after global BA
+    for(int n = 0; n < dataLength; n++){
+        // Mat accumRvec, accumTvec;
+        getAccumulateMotion(relativeRvec_cam, relativeTvec_cam,
+                            0, n,
+                            accumRvec, accumTvec);
+
+        Eigen::Affine3d curPose = vectorToTransformation(accumRvec, accumTvec);
+        Eigen::Affine3d invPose = curPose.inverse();
+
+        mapviewer.addCamera(curPose);
+
+        for(int r = 0; r < 3; r++){
+            for(int c = 0; c < 4; c++){
+                outfile << invPose(r,c) << " ";
+            }
+        }
+        outfile << endl;
+    }
+    outfile.close();
+
+    //=========== draw points after BA ================================
     long unsigned int totalNumPoints = map.allMapPointNumber();
     // convert to Point3f
     Eigen::Affine3d curTrans =  Eigen::Affine3d::Identity();

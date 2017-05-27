@@ -73,10 +73,10 @@ public:
 	void PnP(std::vector<cv::Point3f> obj_pts, 
 	                std::vector<cv::Point2f> img_pts,
 	                cv::Mat& inliers);
-
+    void judgeBadPoints();
 	MapPoint* createNewMapPoint(unsigned int pointIdx);
 	void pointToExistingMapPoint(Frame* frame, MapPoint* mp, unsigned int currIdx);
-	
+	Eigen::Affine3d getWorldTransformationMatridx();
 
 
     void releaseMemory();
