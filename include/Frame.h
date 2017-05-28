@@ -4,6 +4,7 @@
 #include "MapPoint.h"
 #include "Map.h"
 #include "utils.h"
+#include "ORBextractor.h"
 
 #include <vector>
 #include <stdio.h>
@@ -63,7 +64,8 @@ public:
                             std::vector<cv::KeyPoint>& matchedKeypoint1,
                             std::vector<cv::KeyPoint>& matchedKeypoint2,
                             std::vector<cv::DMatch>& matches,
-                            double knn_match_ratio = 0.8);
+                            double knn_match_ratio = 0.8,
+                            bool hamming = false);
 
     void compute3Dpoints(std::vector<cv::KeyPoint>& kl, 
 					 	 std::vector<cv::KeyPoint>& kr,

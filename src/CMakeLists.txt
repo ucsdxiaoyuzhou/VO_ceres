@@ -42,6 +42,7 @@ utils.cpp
 system.cpp
 Mapviewer.cpp
 optimizer.cpp
+ORBextractor.cc
 )
 
 target_link_libraries(${PROJECT_NAME}

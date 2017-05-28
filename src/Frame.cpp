@@ -4,6 +4,7 @@
 using namespace cv;
 using namespace std;
 
+
 Frame::Frame(string leftImgFile, string rightImgFile, 
              STEREO_RECTIFY_PARAMS _srp, int _id, Map* _map):
 			 frameID(_id), map(_map), srp(_srp){
@@ -23,10 +24,11 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     b = -_srp.P2.at<double>(0,3)/fx;
 
     // Mat imgLgray, imgRgray;
+    // Mat imgLgray, imgRgray;
     // cvtColor(imgL, imgLgray, CV_BGR2GRAY);
     // cvtColor(imgR, imgRgray, CV_BGR2GRAY);
 
-    // ORB_SLAM2::ORBextractor* detector = new ORB_SLAM2::ORBextractor(10000,1.1,8,10,5);
+    // ORB_SLAM2::ORBextractor* detector = new ORB_SLAM2::ORBextractor(3000,1.1,8,10,5);
     // (*detector)(imgLgray, cv::Mat(), keypointL, despL);
     // (*detector)(imgRgray, cv::Mat(), keypointR, despR);
 
@@ -164,55 +166,6 @@ void Frame::manageMapPoints(Frame* frame){
 }
 
 void Frame::judgeBadPoints(){
-/*    //compute mean for x, y, z
-    float meanX = 0, meanY = 0, meanZ = 0;
-    int pointNum = 0;
-    for(auto mappoint : mappoints){
-        if(mappoint != NULL){
-            meanX += mappoint->pos.x;
-            meanY += mappoint->pos.y;
-            meanZ += mappoint->pos.z;
-            pointNum++;
-        }
-    }
-    meanX /= (float)pointNum;
-    meanY /= (float)pointNum;
-    meanZ /= (float)pointNum;
-    cout << "mean X: " << meanX << endl;
-    cout << "mean Y: " << meanY << endl;
-    cout << "mean Z: " << meanZ << endl;
-
-
-    //compute variance for x, y, z
-    float varX = 0, varY = 0, varZ = 0;
-    for(auto mappoint : mappoints){
-        if(mappoint != NULL){
-            varX += pow((mappoint->pos.x - meanX), 2);
-            varY += pow((mappoint->pos.y - meanY), 2);
-            varZ += pow((mappoint->pos.z - meanZ), 2);
-        }
-    }
-    varX /= pointNum;
-    varY /= pointNum;
-    varZ /= pointNum;
-    cout << "variance X: " << varX << endl;
-    cout << "variance Y: " << varY << endl;
-    cout << "variance Z: " << varZ << endl;
-
-
-    //detect bad points
-    for(auto mappoint : mappoints){
-        if(mappoint != NULL){
-            float curVarX = pow((mappoint->pos.x - meanX), 2);
-            float curVarY = pow((mappoint->pos.y - meanY), 2);
-            float curVarZ = pow((mappoint->pos.z - meanX), 2);
-            if(curVarX > 1.5* varX || curVarY > 1.5*varY || curVarZ > 1.5*varZ){
-                mappoint->isBad = true;
-            }
-
-        }
-    }
-*/
     //count total number
     int validPointNumber = 0;
     for(auto mappoint : mappoints){
@@ -233,17 +186,11 @@ void Frame::judgeBadPoints(){
                     else{
                         farCount++;
                     }
-//                    cout << "distX: " << distX <<"  distY: " << distY << "  distZ: " << distZ << endl;
-//                    cout << "short distance: " << sqrt(pow(distX, 2) + pow(distY, 2) + pow(distZ, 2)) << endl;
-//                    distance += sqrt(pow(distX, 2) + pow(distY, 2) + pow(distZ, 2));
                 }
             }
             if ((float)farCount/(float)closeCount > 0.1) { mappoint->isBad = true; }
         }
     }
-//    cout << "thres: " << 100*b << endl;
-
-
 }
 
 MapPoint* Frame::createNewMapPoint(unsigned int pointIdx){
@@ -289,7 +236,8 @@ void Frame::matchFeatureKNN(const Mat& desp1, const Mat& desp2,
                             vector<KeyPoint>& matchedKeypoint1,
                             vector<KeyPoint>& matchedKeypoint2,
                             vector<DMatch>& matches,
-                            double knn_match_ratio){
+                            double knn_match_ratio,
+                            bool hamming){
 
     matchedKeypoint1.clear();
     matchedKeypoint2.clear();
@@ -297,34 +245,64 @@ void Frame::matchFeatureKNN(const Mat& desp1, const Mat& desp2,
 
     float imgThres = 0.15 * std::sqrt(std::pow(imgL.rows, 2)+std::pow(imgL.cols, 2));
 
-    cv::Ptr<cv::DescriptorMatcher>  matcher = cv::DescriptorMatcher::create("BruteForce");
+    if(hamming){
+    	cv::Ptr<cv::DescriptorMatcher>  matcher = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
+    	vector< vector<cv::DMatch> > matches_knn;
+	    matcher->knnMatch( desp1, desp2, matches_knn, 2 );
+	    vector< cv::DMatch > tMatches;
 
-    vector< vector<cv::DMatch> > matches_knn;
-    matcher->knnMatch( desp1, desp2, matches_knn, 2 );
-    vector< cv::DMatch > tMatches;
+	    for ( size_t i=0; i<matches_knn.size(); i++ )
+	    {
+	        if (matches_knn[i][0].distance < knn_match_ratio * matches_knn[i][1].distance )
+	            tMatches.push_back( matches_knn[i][0] );
+	    }
+	    
+	    if (tMatches.size() <= 20) //too few matches
+	        return;
 
-    for ( size_t i=0; i<matches_knn.size(); i++ )
-    {
-        if (matches_knn[i][0].distance < knn_match_ratio * matches_knn[i][1].distance )
-            tMatches.push_back( matches_knn[i][0] );
+	    vector<KeyPoint> tMatchedKeypoint1, tMatchedKeypoint2;
+	    for ( auto m:tMatches )
+	    {
+	        Point2f pt1, pt2;
+	        pt1 = keypoint1[m.queryIdx].pt;
+	        pt2 = keypoint2[m.trainIdx].pt;
+	        float ptdist = std::sqrt(std::pow(pt1.x-pt2.x, 2) + std::pow(pt1.y-pt2.y, 2));
+	        if(ptdist < imgThres){
+	            matchedKeypoint1.push_back(keypoint1[m.queryIdx]);
+	            matchedKeypoint2.push_back(keypoint2[m.trainIdx]);
+	            matches.push_back(m);
+	        } 
+	    }  
     }
-    
-    if (tMatches.size() <= 20) //too few matches
-        return;
+    else{
+    	cv::Ptr<cv::DescriptorMatcher>  matcher = cv::DescriptorMatcher::create("BruteForce");
+	    vector< vector<cv::DMatch> > matches_knn;
+	    matcher->knnMatch( desp1, desp2, matches_knn, 2 );
+	    vector< cv::DMatch > tMatches;
 
-    vector<KeyPoint> tMatchedKeypoint1, tMatchedKeypoint2;
-    for ( auto m:tMatches )
-    {
-        Point2f pt1, pt2;
-        pt1 = keypoint1[m.queryIdx].pt;
-        pt2 = keypoint2[m.trainIdx].pt;
-        float ptdist = std::sqrt(std::pow(pt1.x-pt2.x, 2) + std::pow(pt1.y-pt2.y, 2));
-        if(ptdist < imgThres){
-            matchedKeypoint1.push_back(keypoint1[m.queryIdx]);
-            matchedKeypoint2.push_back(keypoint2[m.trainIdx]);
-            matches.push_back(m);
-        } 
-    }  
+	    for ( size_t i=0; i<matches_knn.size(); i++ )
+	    {
+	        if (matches_knn[i][0].distance < knn_match_ratio * matches_knn[i][1].distance )
+	            tMatches.push_back( matches_knn[i][0] );
+	    }
+	    
+	    if (tMatches.size() <= 20) //too few matches
+	        return;
+
+	    vector<KeyPoint> tMatchedKeypoint1, tMatchedKeypoint2;
+	    for ( auto m:tMatches )
+	    {
+	        Point2f pt1, pt2;
+	        pt1 = keypoint1[m.queryIdx].pt;
+	        pt2 = keypoint2[m.trainIdx].pt;
+	        float ptdist = std::sqrt(std::pow(pt1.x-pt2.x, 2) + std::pow(pt1.y-pt2.y, 2));
+	        if(ptdist < imgThres){
+	            matchedKeypoint1.push_back(keypoint1[m.queryIdx]);
+	            matchedKeypoint2.push_back(keypoint2[m.trainIdx]);
+	            matches.push_back(m);
+	        } 
+	    } 
+    } 
 }
 
 void Frame::compute3Dpoints(vector<KeyPoint>& kl, 
