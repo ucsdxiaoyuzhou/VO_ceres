@@ -93,56 +93,93 @@ struct SnavelyReprojectionError {
   double observed_y;
   double f, cx, cy;
 };
-/*
-struct SnavelyPoseOnlyError {
-  SnavelyPoseOnlyError(double observed_x, double observed_y, double f, double cx, double cy)
-      : observed_x(observed_x), observed_y(observed_y), f(f), cx(cx), cy(cy) {}
 
-  template <typename T>
-  bool operator()(const T* const camera,
-                  const T* const point,
-                  T* residuals) const {
-    // camera[0,1,2] are the angle-axis rotation.
-    T p[3];
-    AngleAxisRotatePoint(camera, point, p);
-    // camera[3,4,5] are the translation.
-    p[0] += camera[3];
-    p[1] += camera[4];
-    p[2] += camera[5];
-    // Compute the center of distortion. The sign change comes from
-    // the camera model that Noah Snavely's Bundler assumes, whereby
-    // the camera coordinate system has a negative z axis.
-    const T xp = T(f) * p[0] / p[2] + T(cx);
-    const T yp = T(f) * p[1] / p[2] + T(cy);
-    
-    const T predicted_x = xp;
-    const T predicted_y = yp;
+struct PoseSmoothnessError
+{
+    Eigen::Affine3d fromSrcToRefInv;
+    Eigen::Affine3d refPoseInv;
+    double rScale;
+    double tScale;
 
+    PoseSmoothnessError(const Eigen::Affine3d _fromSrcToRefInv, const Eigen::Affine3d _refPoseInv,
+                        const double _rScale, const double _tScale):
+    fromSrcToRefInv(_fromSrcToRefInv.matrix()), refPoseInv(_refPoseInv.matrix()), rScale(_rScale), tScale(_tScale)
+    {}
 
-    // The error is the difference between the predicted and observed position.
-    residuals[0] = predicted_x - observed_x;
-    residuals[1] = predicted_y - observed_y;
-    // std::cout << "predicted: " << focal * distortion * xp-observed_x<< "  "<<focal * distortion * yp-observed_y << std::endl;
-    return true;
-  }
-  // Factory to hide the construction of the CostFunction object from
-  // the client code.
-  static ceres::CostFunction* Create(const double observed_x,
-                                     const double observed_y,
-                                     const double f,
-                                     const double cx,
-                                     const double cy) {
-    return (new ceres::AutoDiffCostFunction<SnavelyReprojectionError,2, 6>(new SnavelyReprojectionError(observed_x, observed_y, f, cx, cy)));
-  }
-  double observed_x;
-  double observed_y;
-  double f, cx, cy;
+    // Factory to hide the construction of the CostFunction object from the client code.
+    static ceres::CostFunction* Create(const Eigen::Affine3d _fromSrcToRefInv, 
+                                       const Eigen::Affine3d _refPoseInv,
+                                       const double _rScale, 
+                                       const double _tScale) {
+        return (new ceres::AutoDiffCostFunction<PoseSmoothnessError, 6, 6>(new PoseSmoothnessError(_fromSrcToRefInv, _refPoseInv, _rScale, _tScale)));
+    }
+
+    template <typename T>
+    bool operator()(const T* const camera, 
+                          T* residuals) const
+    {
+
+        Eigen::Matrix<T, 3, 3> RSrcPose;
+        ceres::AngleAxisToRotationMatrix(camera, RSrcPose.data());
+
+        Eigen::Matrix<T, 4, 4> SrcPoseT;
+        Eigen::Matrix<T, 4, 4> curFromSrcToRefT;
+        Eigen::Matrix<T, 4, 4> posDifT;
+
+        SrcPoseT.block(0, 0, 3, 3) = RSrcPose;
+        SrcPoseT(0, 3) = camera[3];
+        SrcPoseT(1, 3) = camera[4];
+        SrcPoseT(2, 3) = camera[5];
+        SrcPoseT(3, 0) = T(0);
+        SrcPoseT(3, 1) = T(0);
+        SrcPoseT(3, 2) = T(0);
+        SrcPoseT(3, 3) = T(1.0);
+        
+        Eigen::Matrix<T, 4, 4> fromSrcToRefInvT;
+        Eigen::Matrix<T, 4, 4> refPoseInvT;
+        for (int i = 0; i < 4; ++i)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                fromSrcToRefInvT(i,j) = T(fromSrcToRefInv(i,j));
+                refPoseInvT(i,j) = T(refPoseInv(i,j));
+            }
+        }
+
+        curFromSrcToRefT = refPoseInvT * SrcPoseT;
+        posDifT = fromSrcToRefInvT * curFromSrcToRefT;
+
+        Eigen::Matrix<T, 3, 3> posDifRT;
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                posDifRT(i,j) = posDifT(i,j);
+            }
+        }
+
+        T posDifInParams[6];
+        ceres::RotationMatrixToAngleAxis(posDifRT.data(), posDifInParams);
+        posDifInParams[3] = posDifT(0, 3);
+        posDifInParams[4] = posDifT(1, 3);
+        posDifInParams[5] = posDifT(2, 3);
+        // cout << "posDifInParams:\n";
+
+        residuals[0] = T(rScale)*posDifInParams[0];
+        residuals[1] = T(rScale)*posDifInParams[1];
+        residuals[2] = T(rScale)*posDifInParams[2];
+        residuals[3] = T(tScale)*posDifInParams[3];
+        residuals[4] = T(tScale)*posDifInParams[4];
+        residuals[5] = T(tScale)*posDifInParams[5];
+
+        return true;
+    }
 };
-*/
 
 // Projection Error Only
 struct SnavelyReprojectionOnlyError {
-  SnavelyReprojectionOnlyError(double observed_x, double observed_y, double f, double cx, double cy, double* camera)
+  SnavelyReprojectionOnlyError(double observed_x, double observed_y, 
+                               double f, double cx, double cy, double* camera)
       : observed_x(observed_x), observed_y(observed_y), f(f), cx(cx), cy(cy) {
         for (int i = 0; i < 6; ++i)
         {

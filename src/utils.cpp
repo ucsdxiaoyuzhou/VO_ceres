@@ -173,6 +173,19 @@ vector<Point3f> transformPoints(Eigen::Affine3d trans, vector<Point3f> obj_pts){
 	return result;
 }
 
+Point3f transformPoint(Eigen::Affine3d trans, Point3f pt){
+    Point3f result;
+
+
+    Eigen::Affine3d invTrans = trans.inverse();
+    result.x = (float)invTrans(0,0)*pt.x + (float)invTrans(0,1)*pt.y + (float)invTrans(0,2)*pt.z + (float)invTrans(0,3);
+    result.y = (float)invTrans(1,0)*pt.x + (float)invTrans(1,1)*pt.y + (float)invTrans(1,2)*pt.z + (float)invTrans(1,3);
+    result.z = (float)invTrans(2,0)*pt.x + (float)invTrans(2,1)*pt.y + (float)invTrans(2,2)*pt.z + (float)invTrans(2,3);
+
+    return result;
+}
+
+
 vector<Point3f> PointCloudtoPoint3f(PointCloud<PointXYZ> ptcloud){
     PointXYZ ptxyz;
     Point3f pt;
@@ -214,4 +227,8 @@ PointCloud<PointXYZ> Point3ftoPointCloud(vector<Point3f> pts){
         result.points.push_back(ptxyz);
     }
     return result;
+}
+
+double normOfTransform( cv::Mat rvec, cv::Mat tvec ){
+    return fabs(MIN(norm(rvec), 2*M_PI-norm(rvec)))+ fabs(norm(tvec));
 }

@@ -21,7 +21,8 @@ void SLAMsystem(string commonPath, string yamlPath){
         cerr << "ERROR: Wrong path to settings" << endl;
         return;
     }
-    string savePath = fsSettings["trajectory file"];
+    string savePathBefore = fsSettings["trajectory file before"];
+    string savePath = fsSettings["trajectory file after"];
     fsSettings["LEFT.P"] >> srp.P1;
     fsSettings["RIGHT.P"] >> srp.P2;
 
@@ -61,7 +62,7 @@ void SLAMsystem(string commonPath, string yamlPath){
     int deleteFrame = -20;
 
     Problem globalBAProblem;
-    Optimizer ba(true, globalBAProblem);
+    Optimizer ba(false, globalBAProblem);
 
     pcl::visualization::CloudViewer viewer("Cloud Viewer");
     PointCloud<PointXYZRGB>::Ptr cloud (new PointCloud<PointXYZRGB>);
@@ -72,13 +73,13 @@ void SLAMsystem(string commonPath, string yamlPath){
     Frame* prevFrame = new Frame(leftImgName[0], rightImgName[0], srp, 0, &map);
     prevFrame->scenePtsinWorld = prevFrame->scenePts;
 
-    Frame* refFrame = new Frame(leftImgName[0], rightImgName[0], srp, 0, &map);
-    refFrame = prevFrame;
+    // Frame* refFrame = new Frame(leftImgName[0], rightImgName[0], srp, 0, &map);
+    Frame* refFrame = prevFrame;
 
     allFrame.push_back(prevFrame);
 
     for(int n = 1; n < dataLength; n++){
-        cout << "current frame number: " << n << endl;
+        cout << endl<<endl<<"current frame number: " << n << endl;
         Frame* currFrame = new Frame(leftImgName[n], rightImgName[n], srp, n, &map);
         prevFrame->matchFrame(currFrame);
         //=================== accumlate motion ====================
@@ -90,34 +91,44 @@ void SLAMsystem(string commonPath, string yamlPath){
 
         currFrame->setWrdTransVectorAndTransScenePts(accumRvec, accumTvec);
         prevFrame->manageMapPoints(currFrame);
+        // prevFrame->addEdgeConstrain(currFrame->frameID,
+        //                             currFrame->rvec,
+        //                             currFrame->tvec);
+         // cout << "add edge from: "<<prevFrame->frameID<<" to: " << currFrame->frameID<<"  " << currFrame->tvec.at<double>(2,0) << endl;
         allFrame.push_back(currFrame);
         //=================== perform more matching ====================
+        double prevMove = 0;
         for(int t = localTimes-1; t > 0; t--){
-//            cout <<"matching from: " << MAX(0, (int)allFrame.size() - localTimes-1) << " to: " << MAX(0, n-t)  << endl;
-//            allFrame[MAX(0, n-t)]->matchFrame(currFrame);
-//            allFrame[MAX(0, n-t)]->manageMapPoints(currFrame);
-            refFrame->matchFrame(allFrame[MAX(0, n-t)]);
+            refFrame->matchFrame(allFrame[MAX(0, n-t)], true);
             refFrame->manageMapPoints(allFrame[MAX(0, n-t)]);
-        }
-        ba.localBundleAdjustment(allFrame, MAX(0, (int)allFrame.size()-localTimes), localTimes);
-        allFrame[MAX(0, (int)allFrame.size()-localTimes)]->judgeBadPoints();
 
-        //================= test: count bad point number =================
-//        int badPointNum = 0;
-//        for(auto mappoint : map.allMapPoints){
-//            if(mappoint->isBad){badPointNum++;}
-//        }
-//        cout << "bad point number: " << badPointNum << endl;
-        //=================== show result ================================
-//        Mat showTvec, showRvec;
-//        getAccumulateMotion(relativeRvec_cam, relativeTvec_cam,
-//                            0, MAX(0, n - localTimes),
-//                            accumRvec, accumTvec);
-//        cout <<endl<<endl<< n<<"  "<<accumTvec.at<double>(0,0)<<"  "<<accumTvec.at<double>(1,0)<<"  "<<accumTvec.at<double>(2,0)<<endl;
-//
-//        showRvec = allFrame[MAX(0, n - localTimes)]->worldRvec.clone();
-//        showTvec = allFrame[MAX(0, n - localTimes)]->worldTvec.clone();
-//        cout <<"  "<<showTvec.at<double>(0,0)<<"  "<<showTvec.at<double>(1,0)<<"  "<<showTvec.at<double>(2,0)<<endl<<endl;
+            // double currMove = normOfTransform(allFrame[MAX(0, n-t)]->rvec, allFrame[MAX(0, n-t)]->tvec);
+            // if(currMove > prevMove && currMove < localTimes*3.0){
+            //     prevMove = currMove;
+            //     refFrame->addEdgeConstrain(allFrame[MAX(0, n-t)]->frameID, 
+            //                                allFrame[MAX(0, n-t)]->rvec, 
+            //                                allFrame[MAX(0, n-t)]->tvec);
+            //     cout << "add edge from: "<<refFrame->frameID<<" to: " << allFrame[MAX(0, n-t)]->frameID<<"  " << allFrame[MAX(0, n-t)]->tvec.at<double>(2,0) << endl;
+            // }
+
+        }
+
+        // for(edgeConstrain::iterator eIt = refFrame->relativePose.begin();
+        //                             eIt!= refFrame->relativePose.end();
+        //                             eIt++) {
+        //     cout << "edge between " << refFrame->frameID << " and " << (*eIt).first << " is: ";
+        //     for(int n = 0; n < 3; n++) {
+        //         cout << (*eIt).second.second.at<double>(n,0) << " ";
+        //     }
+        //     cout << endl;
+        // }
+            
+        ba.localBundleAdjustment(allFrame, MAX(0, (int)allFrame.size()-localTimes), localTimes);
+        refFrame->judgeBadPoints();
+        for(int t = localTimes-1; t>0; t--){
+            allFrame[MAX(0, n-t)]->judgeBadPoints();
+        }
+
         //============== update accumulative transformation ================
         for(int n = MAX(0, (int)allFrame.size()-localTimes)+1; n < allFrame.size(); n++){
 
@@ -147,21 +158,19 @@ void SLAMsystem(string commonPath, string yamlPath){
         viewer.showCloud(cloud);
         if(waitKey(5) == 27){};
 
+        //============ prepare next loop ================================
         refFrame = allFrame[MAX(0, (int)allFrame.size()-localTimes-1 )];
-
         prevFrame = allFrame.back();
 
         deleteFrame++;
-        if(deleteFrame > 0) {
+        if(deleteFrame > 15 && deleteFrame < 1570) {
             allFrame[deleteFrame]->releaseMemory();
         }
     }
 
 //============== end of main loop =========================================================================
-
-
     ofstream outfile;
-    outfile.open("../beforeBA.txt");
+    outfile.open(savePathBefore);
     //evaluate before global BA
     for(int n = 0; n < dataLength; n++){
         // Mat accumRvec, accumTvec;
@@ -200,7 +209,21 @@ void SLAMsystem(string commonPath, string yamlPath){
     outfile.close();
 
     outfile.open(savePath);
-    ba.globalBundleAdjustment(&map, allFrame);
+
+    //======== test: manually add loop ======================
+    // cout << endl<<endl<<"manually adding loops..." << endl<<endl;
+    // for(int out = 0; out < 10; out ++) {
+    //     for(int n = 1575; n < 1580; n++) {
+    //         allFrame[out]->matchFrame(allFrame[n]);
+    //         allFrame[out]->manageMapPoints(allFrame[n]);
+    //     }
+    // }
+
+
+    //======== test ends ====================================
+
+    // ba.globalBundleAdjustment(&map, allFrame);
+    ba.poseOptimization(allFrame);
     //============== update accumulative transformation ================
     for(int n = 1; n < allFrame.size(); n++){
 

@@ -32,13 +32,14 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     // (*detector)(imgLgray, cv::Mat(), keypointL, despL);
     // (*detector)(imgRgray, cv::Mat(), keypointR, despR);
 
-    SurfFeatureDetector detector(10, 6, 3);
+    SurfFeatureDetector detector(1, 6, 3);
     SurfDescriptorExtractor descriptor;
     
     detector.detect(imgL, keypointL);
     detector.detect(imgR, keypointR);
     
-    descriptor.compute(imgL, keypointL, despL);
+    Mat tempDespL;
+    descriptor.compute(imgL, keypointL, tempDespL);
     descriptor.compute(imgR, keypointR, despR);
 
     rvec = Mat::zeros(3, 1, CV_64F);
@@ -51,15 +52,25 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     vector<DMatch> stereoMatches;
 
     //compute stereo matches
-    matchFeatureKNN(despL, despR, keypointL, keypointR,
+    vector<int> sceneInliers;
+    matchFeatureKNN(tempDespL, despR, keypointL, keypointR,
     				stereoKeypointLeft, stereoKeypointRight,
-    				stereoMatches, 0.7);
+    				stereoMatches, 0.8);
 
     compute3Dpoints(stereoKeypointLeft, stereoKeypointRight,
-    				keypointL, keypointR);
+    				keypointL, keypointR, sceneInliers);
 
-    descriptor.compute(imgL, keypointL, despL);
+    vector<int> keypointLinliers;
+    for(int idx : sceneInliers){
+        keypointLinliers.push_back(stereoMatches[idx].queryIdx);
+    }
 
+    // extract descriptors
+    despL = Mat(keypointLinliers.size(), tempDespL.cols, tempDespL.type());
+
+    for(int n = 0; n < keypointLinliers.size(); n++){
+        tempDespL.row(keypointLinliers[n]).copyTo(despL.row(n));
+    }
     mappoints = vector<MapPoint*>(keypointL.size(), static_cast<MapPoint*>(NULL));
     originality = vector<bool>(keypointL.size(), false);
 //    drawMatch(imgL, keypointL, keypointR, 1, "stereo");
@@ -70,7 +81,10 @@ bool idx_comparator(const DMatch& m1, const DMatch& m2){
 	return m1.queryIdx < m2.queryIdx;
 }
 
-void Frame::matchFrame(Frame* frame){
+void Frame::matchFrame(Frame* frame, bool useMappoints){
+    rvec.release();
+    tvec.release();
+
     matchesBetweenFrame.clear();
 	//first step, match using features
     vector<KeyPoint> matchedPrev, matchedCurr;
@@ -80,18 +94,34 @@ void Frame::matchFrame(Frame* frame){
                     matchedPrev, matchedCurr,
                     matches, 0.8);
 
+
     // obtain obj_pts, img_pts and matchedIdx
     vector<Point3f> obj_pts;
     vector<Point2f> img_pts;
 
+    vector<DMatch> tempMatches;
     for(auto m : matches){
-        // frame.matchedIdx.push_back(m.queryIdx);
-        obj_pts.push_back(scenePts[m.queryIdx]);
+        if(mappoints[m.queryIdx]!=NULL && 
+           !mappoints[m.queryIdx]->isBad &&
+           useMappoints){
+            MapPoint* curMp = mappoints[m.queryIdx];
+            obj_pts.push_back(curMp->getPositionInCameraCoordinate(worldRvec, worldTvec));
+        }
+        else{
+            obj_pts.push_back(scenePts[m.queryIdx]);
+        }
+        
         img_pts.push_back(frame->keypointL[m.trainIdx].pt);
     }
     Mat inliers;
     PnP(obj_pts, img_pts, inliers);
 
+    //========= test: get match ratio =================
+    cout <<endl<<"frame " << frameID <<" to frame "<< frame->frameID <<endl; 
+    // cout << "current match ratio: " << (1.0*inliers.rows)/(1.0*keypointL.size()) << endl;
+    // cout << "current match number: " << inliers.rows << endl;
+    cout << tvec.at<double>(0,0) << " " << tvec.at<double>(1,0) << " " << tvec.at<double>(2,0)<<endl;
+    //========= test ends =============================
     for(int n = 0; n < inliers.rows; n++){
         matchesBetweenFrame.push_back(matches[inliers.at<int>(n,0)]);
     }
@@ -113,6 +143,7 @@ void Frame::matchFrame(Frame* frame){
 void Frame::setWrdTransVectorAndTransScenePts(cv::Mat _worldRvec, cv::Mat _worldTvec) {
     worldRvec = _worldRvec.clone();
     worldTvec = _worldTvec.clone();
+
     transformScenePtsToWorldCoordinate();
 }
 
@@ -164,6 +195,11 @@ void Frame::manageMapPoints(Frame* frame){
 //     cout << "new observation number: " << newObservationCount << endl;
     // cout << "between frame: "<<frameID <<" and frame: " << frame->frameID << endl<<endl;
 }
+
+void Frame::addEdgeConstrain(unsigned int id, Mat relativeRvec, Mat relativeTvec){
+    relativePose.insert(make_pair(id, make_pair(relativeRvec, relativeTvec)));
+}
+
 
 void Frame::judgeBadPoints(){
     //count total number
@@ -308,7 +344,8 @@ void Frame::matchFeatureKNN(const Mat& desp1, const Mat& desp2,
 void Frame::compute3Dpoints(vector<KeyPoint>& kl, 
 					 	    vector<KeyPoint>& kr,
 					 		vector<KeyPoint>& trikl,
-					 		vector<KeyPoint>& trikr){
+					 		vector<KeyPoint>& trikr,
+                            vector<int>& inliers){
 
 	vector<KeyPoint> copy_kl, copy_kr;
 	copy_kl = kl;
@@ -317,6 +354,7 @@ void Frame::compute3Dpoints(vector<KeyPoint>& kl,
 	scenePts.clear();
 	trikl.clear();
 	trikr.clear();
+    inliers.clear();
 
 	double thres = 45*b;
 
@@ -331,11 +369,12 @@ void Frame::compute3Dpoints(vector<KeyPoint>& kl,
 			scenePts.push_back(pd);
 			trikl.push_back(copy_kl[n]);
 			trikr.push_back(copy_kr[n]);
+            inliers.push_back(n);
 		}
 	}
 }
 
-Eigen::Affine3d Frame::getWorldTransformationMatridx(){
+Eigen::Affine3d Frame::getWorldTransformationMatrix(){
     Mat R;
     Eigen::Affine3d result;
     Rodrigues(worldRvec, R);

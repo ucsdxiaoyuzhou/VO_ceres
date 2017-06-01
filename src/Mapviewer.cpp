@@ -8,9 +8,9 @@ Mapviewer::Mapviewer(){
 	// cloud = new pcl::PointCloud<pcl::PointXYZ>();
 //	PointCloud<PointXYZRGB> curCamera;
 	float cameraSize = 0.1;
-	for(float x = -cameraSize; x < cameraSize; x+=(cameraSize/5)){
-		for(float y = -cameraSize; y < cameraSize; y+=(cameraSize/5)){
-			for(float z = -cameraSize; z < cameraSize; z+=(cameraSize/5)){
+	for(float x = -cameraSize; x < cameraSize; x+=(cameraSize/2)){
+		for(float y = -cameraSize; y < cameraSize; y+=(cameraSize/2)){
+			for(float z = -cameraSize; z < cameraSize; z+=(cameraSize/2)){
 				PointXYZRGB pt;
 				pt.x = x;
 				pt.y = y;

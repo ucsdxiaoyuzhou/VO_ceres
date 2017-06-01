@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <algorithm>
+#include <unordered_set>
 
 //ceres
 #include "ceres/ceres.h"
@@ -39,6 +40,7 @@ using ceres::Solver;
 #include "Map.h"
 #include "MapPoint.h"
 #include "draw.hpp"
+#include "utils.h"
 
 using namespace std;
 using namespace cv;
@@ -65,6 +67,7 @@ public:
 
     void globalBundleAdjustment(Map* map, vector<Frame*> frames);
     void localBundleAdjustment(vector<Frame*> frames, int startIdx, int length);
+	void poseOptimization(vector<Frame* > frames);
 
 	void solveProblem(Problem& pb);
 

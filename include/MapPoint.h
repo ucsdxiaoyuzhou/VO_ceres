@@ -3,7 +3,6 @@
 
 #include <opencv2/core/core.hpp>
 #include <vector>
-#include <set>
 #include <map>
 #include <stdio.h>
 
@@ -18,6 +17,8 @@ public:
 			 unsigned int _frameID, 
 			 unsigned int _keypointIdx);
 	void addObservation(Frame* frame, unsigned int pointIdx);
+	cv::Point3f getPositionInCameraCoordinate(cv::Mat rvec, cv::Mat tvec);
+
 
 public:
 	cv::Point3f pos; //pose in the first visited frame, in world coordinate
