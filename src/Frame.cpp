@@ -32,7 +32,7 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     // (*detector)(imgLgray, cv::Mat(), keypointL, despL);
     // (*detector)(imgRgray, cv::Mat(), keypointR, despR);
 
-    SurfFeatureDetector detector(1, 6, 3);
+    SurfFeatureDetector detector(10, 6, 3);
     SurfDescriptorExtractor descriptor;
     
     detector.detect(imgL, keypointL);
@@ -73,6 +73,7 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     }
     mappoints = vector<MapPoint*>(keypointL.size(), static_cast<MapPoint*>(NULL));
     originality = vector<bool>(keypointL.size(), false);
+    // drawFeature(imgL, keypointL, "features");
 //    drawMatch(imgL, keypointL, keypointR, 1, "stereo");
 //    waitKey(1000);
 }
@@ -117,10 +118,10 @@ void Frame::matchFrame(Frame* frame, bool useMappoints){
     PnP(obj_pts, img_pts, inliers);
 
     //========= test: get match ratio =================
-    cout <<endl<<"frame " << frameID <<" to frame "<< frame->frameID <<endl; 
+    // cout <<endl<<"frame " << frameID <<" to frame "<< frame->frameID <<endl; 
     // cout << "current match ratio: " << (1.0*inliers.rows)/(1.0*keypointL.size()) << endl;
     // cout << "current match number: " << inliers.rows << endl;
-    cout << tvec.at<double>(0,0) << " " << tvec.at<double>(1,0) << " " << tvec.at<double>(2,0)<<endl;
+    // cout << tvec.at<double>(0,0) << " " << tvec.at<double>(1,0) << " " << tvec.at<double>(2,0)<<endl;
     //========= test ends =============================
     for(int n = 0; n < inliers.rows; n++){
         matchesBetweenFrame.push_back(matches[inliers.at<int>(n,0)]);
@@ -228,6 +229,37 @@ void Frame::judgeBadPoints(){
         }
     }
 }
+
+void Frame::judgeBadPointsKdTree() {
+    //build kd-tree
+    int validPointNumber = 0;
+    vector<Point3f> mappoints3f;
+    for(auto mappoint : mappoints) {
+        if(mappoint != NULL) {
+            mappoints3f.push_back(mappoint->pos);
+            validPointNumber++;
+        }
+    }
+
+    KDTree pointsKDTree(mappoints3f, false);
+
+    int K =10, Emax = INT_MAX;
+    int idx[K];
+    float dist[K];
+    
+    // for(auto mappoint3f : mappoints3f) {
+    //     pointsKDTree.findNearest(mappoint3f, K, Emax, idx, 0, dist);
+    //     float aveDist = 0;
+    //     for(int n = 0; n < K; n++) {aveDist += dist[n];}
+    //     aveDist /= (float)K;
+    //     cout << "averag distance: " << aveDist << endl;
+
+    // }
+
+
+}
+
+
 
 MapPoint* Frame::createNewMapPoint(unsigned int pointIdx){
 //	MapPoint* ptrMp = new MapPoint(scenePtsinWorld[pointIdx], frameID, pointIdx);

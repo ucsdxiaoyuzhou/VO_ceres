@@ -9,12 +9,12 @@ INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS}  )
 LINK_LIBRARIES( ${PCL_LIBRARY_DIRS} )
 
 #g2o
-#SET( G2O_ROOT /usr/local/include/g2o )
-#FIND_PACKAGE( G2O REQUIRED )
+SET( G2O_ROOT /usr/local/include/g2o )
+FIND_PACKAGE( G2O REQUIRED )
 
 #CSparse
-#FIND_PACKAGE( CSparse REQUIRED )
-#INCLUDE_DIRECTORIES( ${G2O_INCLUDE_DIR} ${CSPARSE_INCLUDE_DIR} )
+FIND_PACKAGE( CSparse REQUIRED )
+INCLUDE_DIRECTORIES( ${G2O_INCLUDE_DIR} ${CSPARSE_INCLUDE_DIR} )
 
 # Eigen
 FIND_PACKAGE( Eigen3 REQUIRED )
@@ -34,6 +34,7 @@ MESSAGE("gflags found ${Gflags_FOUND} at ${GFLAGS_INCLUDE_DIRS} with namespace: 
 
 #==build library for my own source code=====
 add_library (${PROJECT_NAME} SHARED 
+PoseOpt.cpp
 draw.cpp
 Frame.cpp
 Map.cpp
@@ -49,7 +50,7 @@ target_link_libraries(${PROJECT_NAME}
 ${PCL_LIBRARIES} 
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
-#g2o_core g2o_types_slam3d g2o_solver_csparse g2o_stuff g2o_csparse_extension ${CSPARSE_LIBRARY}
+g2o_core g2o_types_slam3d g2o_solver_csparse g2o_stuff g2o_csparse_extension ${CSPARSE_LIBRARY}
 ${CERES_LIBRARIES} 
 ${GFLAGS_LIBRARIES}
 )
@@ -61,7 +62,7 @@ ba
 ${PROJECT_NAME} 
 ${OpenCV_LIBS}
 ${PCL_LIBRARIES}
-#${CSPARSE_LIBRARY} 
+${CSPARSE_LIBRARY} 
 ${CERES_LIBRARIES} 
 ${GFLAGS_LIBRARIES}
 )

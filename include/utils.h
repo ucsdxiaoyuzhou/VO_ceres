@@ -82,6 +82,8 @@ void getRelativeMotion(const cv::Mat startPosR, const cv::Mat startPosT,
 
 Eigen::Affine3d vectorToTransformation(cv::Mat rvec, cv::Mat tvec);
 
+void transformationToVector(Eigen::Affine3d trans, cv::Mat& rvec, cv::Mat& tvec);
+
 std::vector<cv::Point3f> transformPoints(Eigen::Affine3d trans, std::vector<cv::Point3f> obj_pts);
 
 cv::Point3f transformPoint(Eigen::Affine3d trans, cv::Point3f pt);

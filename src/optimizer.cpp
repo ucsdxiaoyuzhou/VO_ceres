@@ -7,7 +7,7 @@ Optimizer::Optimizer(bool printOut, Problem& prob):globalBAProblem(prob){
 //    options.max_num_iterations = 10;
 }
 
-void Optimizer::poseOptimization(vector<Frame* > frames) {
+void Optimizer::poseOptimization(vector<Frame* >& frames) {
 
     Problem poseOptProblem;
     double* cameraParameter_ = new double[cameraBlkSize * frames.size()];
@@ -28,20 +28,18 @@ void Optimizer::poseOptimization(vector<Frame* > frames) {
     for(int n = 0; n < frames.size(); n++) {
         for(auto obs : frames[n]->relativePose){
             camera = cameras + n*cameraBlkSize;
+            double* refCamera = cameras + obs.first*cameraBlkSize;
             //add an edge for the current camera
             Eigen::Affine3d fromSrcToRef, refPose;
             fromSrcToRef = vectorToTransformation(obs.second.first, 
                                                   obs.second.second);
-            refPose = vectorToTransformation(frames[obs.first]->worldRvec,
-                                             frames[obs.first]->worldTvec);
-            Eigen::Affine3d fromSrcToRefInv, refPoseInv;
-            fromSrcToRefInv = fromSrcToRef.inverse();
-            refPoseInv = refPose.inverse();
 
-            CostFunction* costFunc = PoseSmoothnessError::Create(fromSrcToRefInv,
-                                                                 refPoseInv, 
-                                                                 1.,1.);
-            poseOptProblem.AddResidualBlock(costFunc, NULL, camera);
+            Eigen::Affine3d fromSrcToRefInv;
+            fromSrcToRefInv = fromSrcToRef.inverse();
+
+            CostFunction* costFunc = BinaryPoseSmoothnessError::Create(fromSrcToRefInv, 
+                                                                 		1.,1.);
+            poseOptProblem.AddResidualBlock(costFunc, NULL, camera, refCamera);
         }   
     }
 
@@ -147,7 +145,6 @@ void Optimizer::globalBundleAdjustment(Map* slammap, vector<Frame*> frames){
         (*it)->pos.x = (float)pointParameters_[pointBlkSize*n + 0];
         (*it)->pos.y = (float)pointParameters_[pointBlkSize*n + 1];
         (*it)->pos.z = (float)pointParameters_[pointBlkSize*n + 2];
-//        if((*it)->pos.z > 200){(*it)->isBad = true;}
 
         n++;
     }
@@ -161,6 +158,92 @@ void Optimizer::globalBundleAdjustment(Map* slammap, vector<Frame*> frames){
     }
 
 }
+
+
+void Optimizer::reprojectionOnlyAdjustment(Map* slammap, vector<Frame*> frames){
+  // set camera poses
+    double* cameraParameter_ = new double[cameraBlkSize*frames.size()];
+    cout << "frame size: " << frames.size() << endl;
+    for(int n = 0; n < frames.size(); n++){
+        cameraParameter_[cameraBlkSize*n + 0] = frames[n]->worldRvec.at<double>(0,0);
+        cameraParameter_[cameraBlkSize*n + 1] = frames[n]->worldRvec.at<double>(1,0);
+        cameraParameter_[cameraBlkSize*n + 2] = frames[n]->worldRvec.at<double>(2,0);
+
+        cameraParameter_[cameraBlkSize*n + 3] = frames[n]->worldTvec.at<double>(0,0);
+        cameraParameter_[cameraBlkSize*n + 4] = frames[n]->worldTvec.at<double>(1,0);
+        cameraParameter_[cameraBlkSize*n + 5] = frames[n]->worldTvec.at<double>(2,0);
+    }
+
+    long unsigned int numPointsParameters = pointBlkSize*slammap->allMapPointNumber();
+    double* pointParameters_;
+    pointParameters_ = new double[numPointsParameters];
+    //convert container of mappoints to vector
+    vector<MapPoint*> vallMapPoints;
+    //add all map points into parameter
+    cout << "adding mappoints into problem...";
+    int n = 0;
+    for(set<MapPoint*>::iterator it = slammap->allMapPoints.begin(); 
+                                 it!= slammap->allMapPoints.end(); 
+                                 it++){
+        vallMapPoints.push_back(*it);
+
+        pointParameters_[pointBlkSize*n + 0] = (double)(*it)->pos.x;
+        pointParameters_[pointBlkSize*n + 1] = (double)(*it)->pos.y;
+        pointParameters_[pointBlkSize*n + 2] = (double)(*it)->pos.z;
+
+        n++;
+    }
+    cout <<" done!" << endl;
+    double* points = pointParameters_;
+    double* cameras = cameraParameter_;
+    double* point = points;
+    double* camera = cameras;
+
+    //add mappoints
+    cout << "adding observations into problem...";
+    long unsigned int count = 0;//used to count mappoints
+    for(vector<MapPoint*>::iterator it = vallMapPoints.begin();
+                                    it!= vallMapPoints.end();
+                                    it++){
+        //iterate all observations of a mappoint
+        for(map<Frame*, unsigned int>::iterator pIt = (*it)->observations.begin();
+                                                pIt!= (*it)->observations.end();
+                                                pIt++){
+            Point2f observedPt;
+            observedPt.x = pIt->first->keypointL[pIt->second].pt.x;
+            observedPt.y = pIt->first->keypointL[pIt->second].pt.y;
+            camera = cameras + cameraBlkSize*pIt->first->frameID;
+            point = points + pointBlkSize*count;
+            //fix all cameras
+            CostFunction* costFunc = SnavelyReprojectionOnlyError::Create((double)observedPt.x, 
+                                                                          (double)observedPt.y,
+                                                                           pIt->first->fx,
+                                                                           pIt->first->cx,
+                                                                           pIt->first->cy,
+                                                                           camera);
+            globalBAProblem.AddResidualBlock(costFunc, NULL, point);
+        
+        }
+        count++;
+    }
+    cout << "  done!" << endl;
+    cout << "solving problem..." <<endl;
+    Solve(options, &globalBAProblem, &summary);
+
+    //update mappoints;
+    n = 0;
+    for(set<MapPoint*>::iterator it = slammap->allMapPoints.begin(); 
+                                 it!= slammap->allMapPoints.end(); 
+                                 it++){
+        (*it)->pos.x = (float)pointParameters_[pointBlkSize*n + 0];
+        (*it)->pos.y = (float)pointParameters_[pointBlkSize*n + 1];
+        (*it)->pos.z = (float)pointParameters_[pointBlkSize*n + 2];
+        n++;
+    }
+
+}
+
+
 
 void Optimizer::solveProblem(Problem& pb){
     cout << "solving problem..." <<endl;
@@ -308,7 +391,8 @@ void Optimizer::localBundleAdjustment(vector<Frame* > frames, int startIdx, int 
             point = points + pointBlkSize*pointCount;
 
             //only fix the first frame in the entire sequence
-            if(pIt->first->frameID == 0){
+            if(pIt->first->frameID == 0 && startIdx< 1){
+            // if(pIt->first->frameID == 0){
                 camera = cameras;
                 CostFunction* costFunc = SnavelyReprojectionOnlyError::Create((double)observedPt.x,
                                                                               (double)observedPt.y,

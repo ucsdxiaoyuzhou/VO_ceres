@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_map>
 #include <stdio.h>
+#include <limits>
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/nonfree/nonfree.hpp"
@@ -77,6 +78,7 @@ public:
 	                std::vector<cv::Point2f> img_pts,
 	                cv::Mat& inliers);
     void judgeBadPoints();
+    void judgeBadPointsKdTree();
 	MapPoint* createNewMapPoint(unsigned int pointIdx);
 	void pointToExistingMapPoint(Frame* frame, MapPoint* mp, unsigned int currIdx);
 	Eigen::Affine3d getWorldTransformationMatrix();

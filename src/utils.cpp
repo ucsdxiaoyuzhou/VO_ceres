@@ -164,6 +164,22 @@ Eigen::Affine3d vectorToTransformation(Mat rvec, Mat tvec){
 	return result;
 }
 
+// void transformationToVector(Eigen::Affine3d trans, cv::Mat& rvec, cv::Mat& tvec){
+//     rvec = Mat::zeros(3,1,CV_64F);
+//     tvec = Mat::zeros(3,1,CV_64F);
+
+//     Mat R  = Mat::zeros(3,3,CV_64F);
+//     for(int r = 0; r < 3; r++){
+//         for(int c = 0; c < 3; c++){
+//             R.at<double>(r,c) = trans(r,c);
+//         }
+//     }
+//     Rodrigues(R, rvec);
+//     tvec.at<double>(0,0) = trans(0,3);
+//     tvec.at<double>(1,0) = trans(1,3);
+//     tvec.at<double>(2,0) = trans(2,3);
+// }
+
 vector<Point3f> transformPoints(Eigen::Affine3d trans, vector<Point3f> obj_pts){
 	vector<Point3f> result;
 	PointCloud<PointXYZ> tempCloud = Point3ftoPointCloud(obj_pts);

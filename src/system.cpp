@@ -59,7 +59,7 @@ void SLAMsystem(string commonPath, string yamlPath){
     Mapviewer mapviewer;
     vector<Frame* > allFrame;
 
-    int deleteFrame = -20;
+    int deleteFrame = -5;
 
     Problem globalBAProblem;
     Optimizer ba(false, globalBAProblem);
@@ -73,10 +73,9 @@ void SLAMsystem(string commonPath, string yamlPath){
     Frame* prevFrame = new Frame(leftImgName[0], rightImgName[0], srp, 0, &map);
     prevFrame->scenePtsinWorld = prevFrame->scenePts;
 
-    // Frame* refFrame = new Frame(leftImgName[0], rightImgName[0], srp, 0, &map);
-    Frame* refFrame = prevFrame;
-
     allFrame.push_back(prevFrame);
+
+    Frame* refFrame = allFrame.back();
 
     for(int n = 1; n < dataLength; n++){
         cout << endl<<endl<<"current frame number: " << n << endl;
@@ -90,53 +89,53 @@ void SLAMsystem(string commonPath, string yamlPath){
                             0, n, accumRvec, accumTvec);
 
         currFrame->setWrdTransVectorAndTransScenePts(accumRvec, accumTvec);
+        cout << accumTvec.at<double>(0,0) << "  " << accumTvec.at<double>(1,0) << "  " << accumTvec.at<double>(2,0) << endl;
         prevFrame->manageMapPoints(currFrame);
-        // prevFrame->addEdgeConstrain(currFrame->frameID,
-        //                             currFrame->rvec,
-        //                             currFrame->tvec);
-         // cout << "add edge from: "<<prevFrame->frameID<<" to: " << currFrame->frameID<<"  " << currFrame->tvec.at<double>(2,0) << endl;
+      
         allFrame.push_back(currFrame);
         //=================== perform more matching ====================
         double prevMove = 0;
-        for(int t = localTimes-1; t > 0; t--){
-            refFrame->matchFrame(allFrame[MAX(0, n-t)], true);
-            refFrame->manageMapPoints(allFrame[MAX(0, n-t)]);
+        if(n > 0){
+            for(int t = localTimes-1; t > 0; t--){
+                refFrame->matchFrame(allFrame[MAX(0, n-t)], true);
+                refFrame->manageMapPoints(allFrame[MAX(0, n-t)]);
 
-            // double currMove = normOfTransform(allFrame[MAX(0, n-t)]->rvec, allFrame[MAX(0, n-t)]->tvec);
-            // if(currMove > prevMove && currMove < localTimes*3.0){
-            //     prevMove = currMove;
-            //     refFrame->addEdgeConstrain(allFrame[MAX(0, n-t)]->frameID, 
-            //                                allFrame[MAX(0, n-t)]->rvec, 
-            //                                allFrame[MAX(0, n-t)]->tvec);
-            //     cout << "add edge from: "<<refFrame->frameID<<" to: " << allFrame[MAX(0, n-t)]->frameID<<"  " << allFrame[MAX(0, n-t)]->tvec.at<double>(2,0) << endl;
-            // }
+                // double currMove = normOfTransform(allFrame[MAX(0, n-t)]->rvec, allFrame[MAX(0, n-t)]->tvec);
+                // if(currMove > prevMove && currMove < localTimes*3.0){
+                //     prevMove = currMove;
+                //     refFrame->addEdgeConstrain(allFrame[MAX(0, n-t)]->frameID, 
+                //                                allFrame[MAX(0, n-t)]->rvec, 
+                //                                allFrame[MAX(0, n-t)]->tvec);
+                //     cout << "add edge from: "<<refFrame->frameID<<" to: " << allFrame[MAX(0, n-t)]->frameID<<"  " << allFrame[MAX(0, n-t)]->tvec.at<double>(2,0) << endl;
+                // }
 
-        }
+            }
+            ba.localBundleAdjustment(allFrame, MAX(0, (int)allFrame.size()-localTimes), localTimes);
+            refFrame->judgeBadPointsKdTree();
+            for(int t = localTimes-1; t>0; t--){
+                allFrame[MAX(0, n-t)]->judgeBadPoints();
+            }
 
-        // for(edgeConstrain::iterator eIt = refFrame->relativePose.begin();
-        //                             eIt!= refFrame->relativePose.end();
-        //                             eIt++) {
-        //     cout << "edge between " << refFrame->frameID << " and " << (*eIt).first << " is: ";
-        //     for(int n = 0; n < 3; n++) {
-        //         cout << (*eIt).second.second.at<double>(n,0) << " ";
-        //     }
-        //     cout << endl;
-        // }
+            //============== update accumulative transformation ================
+            for(int n = MAX(0, (int)allFrame.size()-localTimes)+1; n < allFrame.size(); n++) {
+
+                getRelativeMotion(allFrame[n-1]->worldRvec, allFrame[n-1]->worldTvec,
+                                  allFrame[n]->worldRvec,   allFrame[n]->worldTvec,
+                                  relativeRvec_cam[n-1],
+                                  relativeTvec_cam[n-1]);
+                allFrame[n-1]->addEdgeConstrain(n,
+                                               relativeRvec_cam[n-1],
+                                               relativeTvec_cam[n-1]);
+            }
             
-        ba.localBundleAdjustment(allFrame, MAX(0, (int)allFrame.size()-localTimes), localTimes);
-        refFrame->judgeBadPoints();
-        for(int t = localTimes-1; t>0; t--){
-            allFrame[MAX(0, n-t)]->judgeBadPoints();
         }
 
-        //============== update accumulative transformation ================
-        for(int n = MAX(0, (int)allFrame.size()-localTimes)+1; n < allFrame.size(); n++){
 
-            getRelativeMotion(allFrame[n-1]->worldRvec, allFrame[n-1]->worldTvec,
-                              allFrame[n]->worldRvec,   allFrame[n]->worldTvec,
-                              relativeRvec_cam[n-1],
-                              relativeTvec_cam[n-1]);
-        }
+            
+        
+
+        //=============draw map=============================================
+        
         Mat tempAccumRvec, tempAccumTvec;
         for(int n = MAX(0, (int)allFrame.size()-localTimes); n < allFrame.size(); n++) {
 
@@ -144,8 +143,6 @@ void SLAMsystem(string commonPath, string yamlPath){
                                 0, n, tempAccumRvec, tempAccumTvec);
             allFrame[n]->setWrdTransVectorAndTransScenePts(tempAccumRvec,tempAccumTvec);
         }
-
-        //=============draw map=============================================
         Eigen::Affine3d curTrans =  Eigen::Affine3d::Identity();
         Eigen::Affine3d curCam = vectorToTransformation(tempAccumRvec, tempAccumTvec);
         vector<Point3f> allPoints = map.getAllMapPoints();
@@ -157,7 +154,6 @@ void SLAMsystem(string commonPath, string yamlPath){
 
         viewer.showCloud(cloud);
         if(waitKey(5) == 27){};
-
         //============ prepare next loop ================================
         refFrame = allFrame[MAX(0, (int)allFrame.size()-localTimes-1 )];
         prevFrame = allFrame.back();
@@ -211,20 +207,97 @@ void SLAMsystem(string commonPath, string yamlPath){
     outfile.open(savePath);
 
     //======== test: manually add loop ======================
+    cout << endl<<endl<<"manually adding loops..." << endl<<endl;
+
     // cout << endl<<endl<<"manually adding loops..." << endl<<endl;
-    // for(int out = 0; out < 10; out ++) {
-    //     for(int n = 1575; n < 1580; n++) {
-    //         allFrame[out]->matchFrame(allFrame[n]);
-    //         allFrame[out]->manageMapPoints(allFrame[n]);
-    //     }
+    for(int out = 0; out < 10; out ++) {
+        for(int n = 1574; n < 1580; n++) {
+            allFrame[n]->matchFrame(allFrame[out]);
+            allFrame[n]->manageMapPoints(allFrame[out]);
+            allFrame[n]->addEdgeConstrain(allFrame[out]->frameID, 
+                                            allFrame[n]->rvec,
+                                            allFrame[n]->tvec);
+            cout << "from frame: " << allFrame[n]->frameID << " to: " << allFrame[out]->frameID << endl;
+            cout << allFrame[out]->tvec.at<double>(0,0) << "  " << allFrame[out]->tvec.at<double>(1,0) << "  "<<allFrame[out]->tvec.at<double>(2,0) <<endl;
+        }
+    }
+
+    // for(int out = 0; out < 20; out ++) {
+    //     allFrame[out]->matchFrame(allFrame[out+834]);
+    //     allFrame[out]->manageMapPoints(allFrame[out+834]);
+    //     allFrame[out]->addEdgeConstrain(allFrame[out+834]->frameID, 
+    //                                     allFrame[out]->rvec,
+    //                                     allFrame[out]->tvec);
+    //     cout << "from frame: " << allFrame[out]->frameID << " to: " << allFrame[out+834]->frameID << endl;
+    //     cout << allFrame[out]->tvec.at<double>(0,0) << "  " << allFrame[out]->tvec.at<double>(1,0) << "  "<<allFrame[out]->tvec.at<double>(2,0) <<endl;
     // }
 
+    // for(int out = 0; out < 10; out ++) {
+    //     allFrame[out]->matchFrame(allFrame[out+8]);
+    //     allFrame[out]->manageMapPoints(allFrame[out+8]);
+    //     allFrame[out]->addEdgeConstrain(allFrame[out+8]->frameID, 
+    //                                     allFrame[out]->rvec,
+    //                                     allFrame[out]->tvec);
+    //     cout << "from frame: " << allFrame[out]->frameID << " to: " << allFrame[out+8]->frameID << endl;
+    //     cout << allFrame[out]->tvec.at<double>(0,0) << "  " << allFrame[out]->tvec.at<double>(1,0) << "  "<<allFrame[out]->tvec.at<double>(2,0) <<endl;
+    // }
 
-    //======== test ends ====================================
+    cout<<"creating pose graph..." << endl;
+    PoseOpt poseOpt;
+    for(int n = 0; n < allFrame.size(); n++){
+        poseOpt.addNode(allFrame, n);   
+    }
+    for(int n = 0; n < allFrame.size(); n++){
+        poseOpt.addEdge(allFrame, n);
+    }
+    poseOpt.solve();
+    // cout << "optimizing pose graph, vertice numbers: " << poseOpt.optimizer.vertices().size() << endl;
+    // poseOpt.optimizer.save("../pose_graph/before_full_optimize.g2o");
+    
+    // poseOpt.optimizer.computeActiveErrors();
+    // cout << "Initial chi2 = " << poseOpt.optimizer.chi2() << endl;
+    // poseOpt.optimizer.initializeOptimization();
 
-    // ba.globalBundleAdjustment(&map, allFrame);
-    ba.poseOptimization(allFrame);
+    // cout << poseOpt.optimizer.optimize(10) << endl;
+    // poseOpt.optimizer.save("../pose_graph/after_full_optimize.g2o");
+    // cout<<"Optimization done."<<endl;
+    
+    //======== extract poses after g2o =================================
+    for(int n = 0; n < poseOpt.optimizer.vertices().size(); n++){
+        g2o::VertexSE3* v = dynamic_cast<g2o::VertexSE3*>(poseOpt.optimizer.vertex(n));
+        Eigen::Isometry3d pose = v->estimate();
+        for(int r = 0; r < 3; r++){
+            for(int c = 0; c < 4; c++){
+                outfile << pose(r,c) << "  ";
+            }
+        }
+        outfile << endl;
+    }
+    outfile.close();
+    //======= update pose after pose optimization ======================
+    outfile.open("../09recordPose.txt");
+    for(int n = 0; n < poseOpt.optimizer.vertices().size(); n++){
+        g2o::VertexSE3* v = dynamic_cast<g2o::VertexSE3*>(poseOpt.optimizer.vertex(n));
+        Eigen::Isometry3d pose = v->estimate();
+        Eigen::Affine3d affinePose;
+        for(int r = 0; r < 4; r++){
+            for(int c = 0; c < 4; c++){
+                affinePose(r,c) = pose(r,c);
+            }
+        }
+        affinePose = affinePose.inverse();
+        transformationToVector(affinePose, allFrame[n]->worldRvec, allFrame[n]->worldTvec);
+        outfile << allFrame[n]->worldRvec.at<double>(0,0)<<" "<<allFrame[n]->worldRvec.at<double>(1,0)<<" "<<allFrame[n]->worldRvec.at<double>(2,0)<<" ";
+        outfile << allFrame[n]->worldTvec.at<double>(0,0)<<" "<<allFrame[n]->worldTvec.at<double>(1,0)<<" "<<allFrame[n]->worldTvec.at<double>(2,0)<<endl; 
+    }
+    outfile.close();
+
+    //======== test ends ===============================================
+
+    ba.globalBundleAdjustment(&map, allFrame);
+    // ba.poseOptimization(allFrame);
     //============== update accumulative transformation ================
+    outfile.open("../09afterGlobalBA.txt");
     for(int n = 1; n < allFrame.size(); n++){
 
         getRelativeMotion(allFrame[n-1]->worldRvec, allFrame[n-1]->worldTvec,

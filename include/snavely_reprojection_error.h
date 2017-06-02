@@ -176,6 +176,95 @@ struct PoseSmoothnessError
     }
 };
 
+struct BinaryPoseSmoothnessError
+{
+    Eigen::Affine3d fromSrcToRef;
+    double rScale;
+    double tScale;
+
+    BinaryPoseSmoothnessError(const Eigen::Affine3d _fromSrcToRef,
+                        const double _rScale, const double _tScale):
+    fromSrcToRef(_fromSrcToRef.matrix()), rScale(_rScale), tScale(_tScale)
+    {}
+
+    // Factory to hide the construction of the CostFunction object from the client code.
+    static ceres::CostFunction* Create(const Eigen::Affine3d _fromSrcToRef,
+                                        const double _rScale, const double _tScale)
+    {
+        return (new ceres::NumericDiffCostFunction<BinaryPoseSmoothnessError, ceres::CENTRAL, 6, 6, 6>(new BinaryPoseSmoothnessError(_fromSrcToRef, _rScale, _tScale)));
+    }
+
+    template <typename T>
+    bool operator()(const T * const srcPoseParam, const T * const refPoseParam, T* residuals) const
+    {
+
+        Eigen::Matrix<T, 3, 3> srcPoseR;
+        Eigen::Matrix<T, 3, 3> refPoseR;
+        ceres::AngleAxisToRotationMatrix(srcPoseParam, srcPoseR.data());
+        ceres::AngleAxisToRotationMatrix(refPoseParam, refPoseR.data());
+
+        Eigen::Matrix<T, 4, 4> srcPoseT;
+        Eigen::Matrix<T, 4, 4> refPoseT;
+        Eigen::Matrix<T, 4, 4> curFromRefToSrcT;
+        Eigen::Matrix<T, 4, 4> posDifT;
+
+        srcPoseT.block(0, 0, 3, 3) = srcPoseR;
+        srcPoseT(0, 3) = srcPoseParam[3];
+        srcPoseT(1, 3) = srcPoseParam[4];
+        srcPoseT(2, 3) = srcPoseParam[5];
+        srcPoseT(3, 0) = T(0);
+        srcPoseT(3, 1) = T(0);
+        srcPoseT(3, 2) = T(0);
+        srcPoseT(3, 3) = T(1.0);
+
+        refPoseT.block(0, 0, 3, 3) = refPoseR;
+        refPoseT(0, 3) = refPoseParam[3];
+        refPoseT(1, 3) = refPoseParam[4];
+        refPoseT(2, 3) = refPoseParam[5];
+        refPoseT(3, 0) = T(0);
+        refPoseT(3, 1) = T(0);
+        refPoseT(3, 2) = T(0);
+        refPoseT(3, 3) = T(1.0);
+        Eigen::Matrix<T, 4, 4> fromSrcToRefT;
+        for (int i = 0; i < 4; ++i)
+        {
+            for (int j = 0; j < 4; ++j)
+            {
+                fromSrcToRefT(i,j) = T(fromSrcToRef(i,j));
+            }
+        }
+
+        curFromRefToSrcT = srcPoseT.inverse() * refPoseT;
+        posDifT = fromSrcToRefT * curFromRefToSrcT;
+
+        Eigen::Matrix<T, 3, 3> posDifRT;
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                posDifRT(i,j) = posDifT(i,j);
+            }
+        }
+
+        T posDifInParams[6];
+        ceres::RotationMatrixToAngleAxis(posDifRT.data(), posDifInParams);
+        posDifInParams[3] = posDifT(0, 3);
+        posDifInParams[4] = posDifT(1, 3);
+        posDifInParams[5] = posDifT(2, 3);
+//        // cout << "posDifInParams:\n";
+
+        residuals[0] = T(rScale)*posDifInParams[0];
+        residuals[1] = T(rScale)*posDifInParams[1];
+        residuals[2] = T(rScale)*posDifInParams[2];
+        residuals[3] = T(tScale)*posDifInParams[3];
+        residuals[4] = T(tScale)*posDifInParams[4];
+        residuals[5] = T(tScale)*posDifInParams[5];
+
+        return true;
+    }
+};
+
+
 // Projection Error Only
 struct SnavelyReprojectionOnlyError {
   SnavelyReprojectionOnlyError(double observed_x, double observed_y, 

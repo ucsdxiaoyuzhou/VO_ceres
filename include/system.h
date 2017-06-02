@@ -8,8 +8,8 @@
 #include "Map.h"
 #include "Mapviewer.h"
 #include "optimizer.hpp"
+#include "PoseOpt.h"
 
-// using namespace std;
 
 void SLAMsystem(std::string commonPath, std::string yamlPath);
 

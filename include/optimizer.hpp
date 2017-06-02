@@ -67,7 +67,8 @@ public:
 
     void globalBundleAdjustment(Map* map, vector<Frame*> frames);
     void localBundleAdjustment(vector<Frame*> frames, int startIdx, int length);
-	void poseOptimization(vector<Frame* > frames);
+	void poseOptimization(vector<Frame* >& frames);
+    void reprojectionOnlyAdjustment(Map* map, vector<Frame*> frames);
 
 	void solveProblem(Problem& pb);
 
