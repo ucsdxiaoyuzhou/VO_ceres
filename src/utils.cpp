@@ -31,7 +31,7 @@ vector<string> getImgFileName(string &strPathImg)
 
         if (is_directory)
             continue;
-
+        
         vstrImage.push_back(full_file_name);
     }
     closedir(dir);

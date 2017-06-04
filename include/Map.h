@@ -14,6 +14,9 @@ public:
 	Map();
 	void addMapPoint(MapPoint* mappoint);
 	std::vector<cv::Point3f> getAllMapPoints();
+	void getAllColors(std::vector<unsigned char>& R, 
+					   std::vector<unsigned char>& G,
+					   std::vector<unsigned char>& B);
 	long unsigned int allMapPointNumber();
 	void getMapPointsFromFrame(Frame* frame);
 
@@ -24,4 +27,4 @@ private:
 };
 
 
-#endif
+#endif	

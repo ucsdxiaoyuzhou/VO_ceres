@@ -11,7 +11,8 @@ Frame::Frame(string leftImgFile, string rightImgFile,
 
     imgL = imread(leftImgFile);
     imgR = imread(rightImgFile);
-
+    cout << "image typ: "  << imgL.type() << endl;
+ 
     if(!imgL.data || ! imgR.data){
         cout << "image does not exist..." << endl;
         exit;
@@ -21,7 +22,7 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     fy = _srp.P1.at<double>(1,1);
     cx = _srp.P1.at<double>(0,2);
     cy = _srp.P1.at<double>(1,2);
-    b = -_srp.P2.at<double>(0,3)/fx;
+    b = -(_srp.P2.at<double>(0,3)- _srp.P1.at<double>(0,3))/fx;
 
     // Mat imgLgray, imgRgray;
     // Mat imgLgray, imgRgray;
@@ -73,9 +74,11 @@ Frame::Frame(string leftImgFile, string rightImgFile,
     }
     mappoints = vector<MapPoint*>(keypointL.size(), static_cast<MapPoint*>(NULL));
     originality = vector<bool>(keypointL.size(), false);
-    // drawFeature(imgL, keypointL, "features");
-//    drawMatch(imgL, keypointL, keypointR, 1, "stereo");
-//    waitKey(1000);
+   //  drawFeature(imgL, keypointL, "features");
+   // drawMatch(imgL, keypointL, keypointR, 1, "stereo");
+   // waitKey(100000);
+    imshow("image", imgL);
+    waitKey(1);
 }
 
 bool idx_comparator(const DMatch& m1, const DMatch& m2){
@@ -141,6 +144,13 @@ void Frame::matchFrame(Frame* frame, bool useMappoints){
     drawMatch(imgL, finalP1, finalP2, 1, "pnp inliers");
 }
 
+//should be called after matchframe
+void Frame::updateDescriptor(Frame* frame) {
+    for(auto m : matchesBetweenFrame) {
+        frame->despL.row(m.trainIdx).copyTo(despL.row(m.queryIdx));
+    }
+}
+
 void Frame::setWrdTransVectorAndTransScenePts(cv::Mat _worldRvec, cv::Mat _worldTvec) {
     worldRvec = _worldRvec.clone();
     worldTvec = _worldTvec.clone();
@@ -167,6 +177,7 @@ void Frame::manageMapPoints(Frame* frame){
     		//create a pointer to this mappoint in the matched frame
     		//also need to add an observation
 //            originality[qIdx] = true;
+
     		mappoints[qIdx] = createNewMapPoint(qIdx);
             pointToExistingMapPoint(frame, mappoints[qIdx], tIdx);
 
@@ -206,14 +217,14 @@ void Frame::judgeBadPoints(){
     //count total number
     int validPointNumber = 0;
     for(auto mappoint : mappoints){
-        if(mappoint != NULL){validPointNumber++;}
+        if(mappoint != NULL && !mappoint->isBad){validPointNumber++;}
     }
     //compute each point to other points average distance, if too large, discard
     for(auto mappoint : mappoints){
-        if(mappoint != NULL) {
+        if(mappoint != NULL && !mappoint->isBad) {
             int closeCount = 0, farCount = 0;
             for (auto compareMappoint : mappoints) {
-                if (compareMappoint != NULL) {
+                if (compareMappoint != NULL && !mappoint->isBad) {
                     float distX = compareMappoint->pos.x - mappoint->pos.x;
                     float distY = compareMappoint->pos.y - mappoint->pos.y;
                     float distZ = compareMappoint->pos.z - mappoint->pos.z;
@@ -284,7 +295,7 @@ void Frame::PnP(vector<Point3f> obj_pts,
         return;
     }
     solvePnPRansac(obj_pts, img_pts, K, Mat(),
-                   rvec, tvec, false, 2000,3.0, 300, inliers);
+                   rvec, tvec, false, 2000,3.0, 600, inliers);
     // matchedNumWithCurrentFrame = inliers.rows;
 
     // cout << "PnP inliers: " << matchedNumWithCurrentFrame << endl;

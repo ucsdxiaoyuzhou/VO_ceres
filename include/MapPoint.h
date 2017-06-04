@@ -18,10 +18,15 @@ public:
 			 unsigned int _keypointIdx);
 	void addObservation(Frame* frame, unsigned int pointIdx);
 	cv::Point3f getPositionInCameraCoordinate(cv::Mat rvec, cv::Mat tvec);
-
+	void getColor(unsigned char r, unsigned char g, unsigned char b);
 
 public:
 	cv::Point3f pos; //pose in the first visited frame, in world coordinate
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
+
+	
 	unsigned int firstVisitFrameID;
 	unsigned int firstVisitKeyPointIdx;
 	bool isBad = false;

@@ -82,6 +82,7 @@ public:
 	MapPoint* createNewMapPoint(unsigned int pointIdx);
 	void pointToExistingMapPoint(Frame* frame, MapPoint* mp, unsigned int currIdx);
 	Eigen::Affine3d getWorldTransformationMatrix();
+	void updateDescriptor(Frame* frame);
 
 
     void releaseMemory();

@@ -161,6 +161,7 @@ void Optimizer::globalBundleAdjustment(Map* slammap, vector<Frame*> frames){
 
 
 void Optimizer::reprojectionOnlyAdjustment(Map* slammap, vector<Frame*> frames){
+    Problem reprojectionProblem;
   // set camera poses
     double* cameraParameter_ = new double[cameraBlkSize*frames.size()];
     cout << "frame size: " << frames.size() << endl;
@@ -221,14 +222,14 @@ void Optimizer::reprojectionOnlyAdjustment(Map* slammap, vector<Frame*> frames){
                                                                            pIt->first->cx,
                                                                            pIt->first->cy,
                                                                            camera);
-            globalBAProblem.AddResidualBlock(costFunc, NULL, point);
+            reprojectionProblem.AddResidualBlock(costFunc, NULL, point);
         
         }
         count++;
     }
     cout << "  done!" << endl;
     cout << "solving problem..." <<endl;
-    Solve(options, &globalBAProblem, &summary);
+    Solve(options, &reprojectionProblem, &summary);
 
     //update mappoints;
     n = 0;

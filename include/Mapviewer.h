@@ -30,7 +30,11 @@ public:
 	Mapviewer();
 	void jointToMap(pcl::PointCloud<pcl::PointXYZRGB> frameMap, Eigen::Affine3d& trans);
 	pcl::PointCloud<pcl::PointXYZRGB> pointToPointCloud(std::vector<cv::Point3f> scenePts,
-													 int R=255, int G=255, int B=255);
+													    int R=255, int G=255, int B=255);
+	pcl::PointCloud<pcl::PointXYZRGB> pointToPointCloud(std::vector<cv::Point3f> scenePts, 
+														std::vector<unsigned char> R,
+														std::vector<unsigned char> G,
+														std::vector<unsigned char> B);
 	
 	void addMorePoints(pcl::PointCloud<pcl::PointXYZRGB> frameMap, Eigen::Affine3d& trans, bool downsample = false);
 	void addCamera(Eigen::Affine3d& trans);

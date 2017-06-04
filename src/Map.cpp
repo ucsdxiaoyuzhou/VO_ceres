@@ -18,6 +18,22 @@ std::vector<cv::Point3f> Map::getAllMapPoints(){
 	return result;
 }
 
+void Map::getAllColors(vector<unsigned char>& R, 
+					   vector<unsigned char>& G,
+					   vector<unsigned char>& B){
+	R.clear();
+	G.clear();
+	B.clear();
+
+	for(auto mp : allMapPoints){
+		if(!mp->isBad){ 
+			R.push_back(mp->r);
+			G.push_back(mp->g);
+			B.push_back(mp->b);
+		 }
+	}
+
+}
 
 long unsigned int Map::allMapPointNumber(){
 	return (long unsigned int)allMapPoints.size();

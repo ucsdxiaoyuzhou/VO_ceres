@@ -46,7 +46,28 @@ pcl::PointCloud<pcl::PointXYZRGB> Mapviewer::pointToPointCloud(std::vector<cv::P
 
 	return result;
 }
+pcl::PointCloud<pcl::PointXYZRGB> Mapviewer::pointToPointCloud(std::vector<cv::Point3f> scenePts, 
+														       std::vector<unsigned char> R,
+															   std::vector<unsigned char> G,
+															   std::vector<unsigned char> B){
+	int ptsNum = scenePts.size();
+	PointCloud<PointXYZRGB> result;
+	for(int n = 0; n < ptsNum; n++){
+		PointXYZRGB pt;
+		pt.x = scenePts[n].x;
+		pt.y = scenePts[n].y;
+		pt.z = scenePts[n].z;
+		pt.r = R[n];
+		pt.g = G[n];
+		pt.b = B[n];
+		result.points.push_back(pt);
+	}
 
+	result.height = 1;
+	result.width = result.points.size();
+
+	return result;
+}
 
 void Mapviewer::jointToMap(PointCloud<PointXYZRGB> frameMap, Eigen::Affine3d& trans){
 
