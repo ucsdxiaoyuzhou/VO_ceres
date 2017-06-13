@@ -63,13 +63,10 @@ void PoseOpt::addEdge(const vector<Frame*>& frames, int fromIdx){
 
 		//information matrix
 	    Eigen::Matrix<double, 6, 6> information = Eigen::Matrix< double, 6,6 >::Identity();
-	    // 信息矩阵是协方差矩阵的逆，表示我们对边的精度的预先估计
-	    // 因为pose为6D的，信息矩阵是6*6的阵，假设位置和角度的估计精度均为0.1且互相独立
-	    // 那么协方差则为对角为0.01的矩阵，信息阵则为100的矩阵
+
 	    information(0,0) = information(1,1) = information(2,2) = 80;
-	    information(3,3) = information(5,5) = 90;
-	    information(4,4) = 200;
-	    // 也可以将角度设大一些，表示对角度的估计更加准确
+	    information(3,3) = information(4,4) = information(5,5) = 110;
+
 		edge->setInformation(information);
 		edge->setMeasurement(_T.inverse());
 		optimizer.addEdge(edge);
